@@ -188,7 +188,7 @@
     <div id="app-container" class="hidden min-h-screen flex flex-col">
         
         <!-- SIDEBAR NAVIGATION (Desktop View) -->
-        <aside id="desktop-sidebar" class="sidebar fixed left-0 top-0 h-screen w-64 bg-surface-container-low border-r border-outline-variant flex flex-col p-6 z-40 transition-all duration-300">
+        <aside id="desktop-sidebar" class="sidebar fixed left-0 top-0 h-screen w-64 bg-surface-container-low border-r border-outline-variant flex flex-col p-6 z-40 transition-all duration-300 overflow-y-auto custom-scrollbar">
             <div class="mb-8 flex items-center justify-between">
                 <div>
                     <h1 class="font-headline-md text-primary font-extrabold flex items-center gap-2">
@@ -504,10 +504,6 @@
                         <h2 class="font-display-lg text-primary text-2xl font-extrabold" data-i18n="talhoes_title">Cadastro de Áreas & Lotes</h2>
                         <p class="font-body-md text-on-surface-variant text-sm" data-i18n="talhoes_subtitle">Gerencie suas plantações em hectares e alqueires.</p>
                     </div>
-                    <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-talhao')">
-                        <span class="material-symbols-outlined text-[18px]">add</span>
-                        <span data-i18n="btn_add_plot">Novo Talhão</span>
-                    </button>
                 </div>
                 
                 <!-- Unit calculator panel -->
@@ -520,6 +516,17 @@
                         <span id="stat-total-hectares" class="font-bold font-data-numeral">0,00 Hectares</span>
                         <span id="stat-total-alqueires" class="font-bold font-data-numeral text-primary">0,00 Alqueires</span>
                     </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 pb-2 border-b border-outline-variant/30 mt-4">
+                    <h3 class="font-headline-md font-bold text-on-surface text-lg flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[20px]">potted_plant</span>
+                        <span data-i18n="nav_talhoes">Áreas & Talhões</span>
+                    </h3>
+                    <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-talhao')">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
+                        <span data-i18n="btn_add_plot">Novo Talhão</span>
+                    </button>
                 </div>
 
                 <!-- Plot list container -->
@@ -721,10 +728,6 @@
                         <h2 class="font-display-lg text-primary text-2xl font-extrabold" data-i18n="financeiro_title">Financeiro & Motor Cambial</h2>
                         <p class="font-body-md text-on-surface-variant text-sm" data-i18n="financeiro_subtitle">Lançamento de gastos/receitas e conversão automática entre Real, Guarani e Dólar.</p>
                     </div>
-                    <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-financa')">
-                        <span class="material-symbols-outlined text-[18px]">add</span>
-                        <span data-i18n="btn_add_financa">Lançar Movimento</span>
-                    </button>
                 </div>
                 
                 <!-- Currency Converter Quick Calculator -->
@@ -800,16 +803,22 @@
 
                 <!-- Transaction Ledger -->
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
-                    <div class="flex justify-between items-center mb-6">
+                    <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
                         <h3 class="font-headline-md font-bold text-on-surface" data-i18n="ledger_title">Livro Caixa & Transações</h3>
-                        <div class="flex gap-2 items-center text-xs">
-                            <span class="text-on-surface-variant font-label-md" data-i18n="view_in">Exibir Totais em:</span>
-                            <input type="hidden" id="currency-display-filter" value="BRL" />
-                            <div class="currency-pills-container flex bg-surface-container p-0.5 rounded-lg border border-outline-variant">
-                                <button type="button" id="btn-currency-brl" class="tab-subnav-btn active px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('BRL', this)">BRL (R$)</button>
-                                <button type="button" id="btn-currency-usd" class="tab-subnav-btn px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('USD', this)">USD ($)</button>
-                                <button type="button" id="btn-currency-pyg" class="tab-subnav-btn px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('PYG', this)">PYG (₲)</button>
+                        <div class="flex gap-4 items-center flex-wrap">
+                            <div class="flex gap-2 items-center text-xs">
+                                <span class="text-on-surface-variant font-label-md" data-i18n="view_in">Exibir Totais em:</span>
+                                <input type="hidden" id="currency-display-filter" value="BRL" />
+                                <div class="currency-pills-container flex bg-surface-container p-0.5 rounded-lg border border-outline-variant">
+                                    <button type="button" id="btn-currency-brl" class="tab-subnav-btn active px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('BRL', this)">BRL (R$)</button>
+                                    <button type="button" id="btn-currency-usd" class="tab-subnav-btn px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('USD', this)">USD ($)</button>
+                                    <button type="button" id="btn-currency-pyg" class="tab-subnav-btn px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('PYG', this)">PYG (₲)</button>
+                                </div>
                             </div>
+                            <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-financa')">
+                                <span class="material-symbols-outlined text-[18px]">add</span>
+                                <span data-i18n="btn_add_financa">Lançar Movimento</span>
+                            </button>
                         </div>
                     </div>
                     
@@ -840,10 +849,6 @@
                         <h2 class="font-display-lg text-primary text-2xl font-extrabold" data-i18n="inventario_title">Inventário de Estoque</h2>
                         <p class="font-body-md text-on-surface-variant text-sm" data-i18n="inventario_subtitle">Visão consolidada de todos os ativos em estoque: insumos, combustível e grãos colhidos.</p>
                     </div>
-                    <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-semente-grao')">
-                        <span class="material-symbols-outlined text-[18px]">add</span>
-                        <span data-i18n="btn_add_seed_grain">Novo Registro</span>
-                    </button>
                 </div>
 
                 <!-- KPI Summary Cards -->
@@ -932,10 +937,16 @@
 
                 <!-- Sementes & Grãos Table -->
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
-                    <h3 class="font-headline-md font-bold mb-4 flex items-center gap-2 text-on-surface">
-                        <span class="material-symbols-outlined text-secondary text-[20px]">grain</span>
-                        <span data-i18n="inv_sect_seeds_grains">Sementes & Grãos em Estoque</span>
-                    </h3>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 pb-2 border-b border-outline-variant/30">
+                        <h3 class="font-headline-md font-bold text-on-surface text-lg flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary text-[20px]">grain</span>
+                            <span data-i18n="inv_sect_seeds_grains">Sementes & Grãos em Estoque</span>
+                        </h3>
+                        <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-semente-grao')">
+                            <span class="material-symbols-outlined text-[18px]">add</span>
+                            <span data-i18n="btn_add_seed_grain">Novo Registro</span>
+                        </button>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs min-w-[600px]">
                             <thead>
@@ -987,10 +998,6 @@
                         <h2 class="font-display-lg text-primary text-2xl font-extrabold" data-i18n="safras_title">Controle de Safras</h2>
                         <p class="font-body-md text-on-surface-variant text-sm" data-i18n="safras_subtitle">Gerencie os períodos produtivos e consolide todos os gastos da fazenda.</p>
                     </div>
-                    <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-safra')">
-                        <span class="material-symbols-outlined text-[18px]">add</span>
-                        <span data-i18n="btn_add_safra">Nova Safra</span>
-                    </button>
                 </div>
 
                 <!-- Active Safra Dashboard Card -->
@@ -1000,10 +1007,16 @@
 
                 <!-- Safras Registered Table -->
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
-                    <h3 class="font-headline-md font-bold mb-4 flex items-center gap-2 text-on-surface">
-                        <span class="material-symbols-outlined text-primary text-[20px]">calendar_today</span>
-                        <span data-i18n="nav_safras">Safras & Ciclos Registrados</span>
-                    </h3>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 pb-2 border-b border-outline-variant/30">
+                        <h3 class="font-headline-md font-bold text-on-surface text-lg flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[20px]">calendar_today</span>
+                            <span data-i18n="nav_safras">Safras & Ciclos Registrados</span>
+                        </h3>
+                        <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-safra')">
+                            <span class="material-symbols-outlined text-[18px]">add</span>
+                            <span data-i18n="btn_add_safra">Nova Safra</span>
+                        </button>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs min-w-[600px]">
                             <thead>
@@ -1015,6 +1028,47 @@
                                 </tr>
                             </thead>
                             <tbody id="safras-table-body" class="divide-y divide-outline-variant">
+                                <!-- Dinamicamente preenchido pelo app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW 8: GRÃOS & SEMENTES ================= -->
+            <section id="view-graos_sementes" class="tab-view flex flex-col gap-6">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 pb-4 border-b border-outline-variant/60">
+                    <div>
+                        <h2 class="font-display-lg text-primary text-2xl font-extrabold" data-i18n="nav_graos_sementes">Grãos & Sementes</h2>
+                        <p class="font-body-md text-on-surface-variant text-sm" data-i18n="seeds_grains_subtitle">Controle de estoque de sementes compradas, tratadas e grãos colhidos.</p>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 pb-2 border-b border-outline-variant/30">
+                        <h3 class="font-headline-md font-bold text-on-surface text-lg flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary text-[20px]">grain</span>
+                            <span data-i18n="inv_sect_seeds_grains">Sementes & Grãos em Estoque</span>
+                        </h3>
+                        <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-semente-grao')">
+                            <span class="material-symbols-outlined text-[18px]">add</span>
+                            <span data-i18n="btn_add_seed_grain">Novo Registro</span>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs min-w-[600px]">
+                            <thead>
+                                <tr class="border-b border-outline-variant font-label-md text-on-surface-variant uppercase tracking-wider">
+                                    <th class="p-4" data-i18n="th_date">Data</th>
+                                    <th class="p-4" data-i18n="label_seed_grain_type">Tipo de Registro</th>
+                                    <th class="p-4" data-i18n="inv_item_name">Produto / Variedade</th>
+                                    <th class="p-4" data-i18n="inv_item_qty">Quantidade</th>
+                                    <th class="p-4" data-i18n="label_seed_grain_safra">Safra Relacionada</th>
+                                    <th class="p-4 text-right" data-i18n="th_cost">Custo / Valor</th>
+                                    <th class="p-4 text-center" data-i18n="th_actions">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="seeds-grains-table-body" class="divide-y divide-outline-variant">
                                 <!-- Dinamicamente preenchido pelo app.js -->
                             </tbody>
                         </table>
@@ -1689,6 +1743,110 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <!-- 9. MODAL: ADD SEMENTE & GRÃO -->
+    <div id="modal-add-semente-grao" class="modal-window fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] bg-surface-container-lowest border border-outline-variant p-6 rounded-2xl w-[90%] max-w-md shadow-2xl hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-headline-md font-bold text-primary" data-i18n="modal_add_seed_grain_title">Registrar Sementes / Grãos no Estoque</h3>
+            <button class="hover:bg-surface-container p-1 rounded-full" onclick="closeModal('modal-add-semente-grao')">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <form onsubmit="handleFormSubmitSeedGrain(event)">
+            <div class="form-group mb-4">
+                <label for="seed-grain-type" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_seed_grain_type">Tipo de Registro</label>
+                <select id="seed-grain-type" required class="form-input">
+                    <option value="Semente Comprada" data-i18n="type_seed_bought">Semente Comprada</option>
+                    <option value="Semente Tratada" data-i18n="type_seed_treated">Semente Tratada</option>
+                    <option value="Grão Colhido" data-i18n="type_grain_harvested">Grão Colhido</option>
+                </select>
+            </div>
+            
+            <div class="form-group mb-4">
+                <label for="seed-grain-name" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_seed_grain_name">Nome da Variedade / Item</label>
+                <input type="text" id="seed-grain-name" required placeholder="Ex: Soja M6410 IPRO" class="form-input"/>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="form-group">
+                    <label for="seed-grain-qty" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_seed_grain_qty">Quantidade</label>
+                    <input type="number" step="0.1" id="seed-grain-qty" required class="form-input text-right" placeholder="100"/>
+                </div>
+                <div class="form-group">
+                    <label for="seed-grain-unit" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_seed_grain_unit">Unidade</label>
+                    <select id="seed-grain-unit" required class="form-input">
+                        <option value="Sacas">Sacas</option>
+                        <option value="Kg">Kg</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="seed-grain-safra" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_seed_grain_safra">Safra Relacionada</label>
+                <select id="seed-grain-safra" required class="form-input">
+                    <!-- Dinamicamente preenchido pelo app.js -->
+                </select>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                <div class="form-group col-span-2">
+                    <label for="seed-grain-cost" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_seed_grain_cost">Custo Total / Valor Estimado</label>
+                    <input type="number" step="0.01" id="seed-grain-cost" required class="form-input text-right" placeholder="1500.00"/>
+                </div>
+                <div class="form-group col-span-1">
+                    <label for="seed-grain-currency" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_fin_currency">Moeda</label>
+                    <select id="seed-grain-currency" class="form-input">
+                        <option value="BRL">BRL (R$)</option>
+                        <option value="USD">USD ($)</option>
+                        <option value="PYG">PYG (₲)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group mb-6 flex items-center gap-2">
+                <input type="checkbox" id="seed-grain-auto-tx" class="rounded border-outline-variant text-primary focus:ring-primary" checked/>
+                <label for="seed-grain-auto-tx" class="text-xs font-bold text-on-surface-variant" data-i18n="label_seed_grain_auto_tx">Lançar transação no Livro Caixa</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-full py-3 font-bold" data-i18n="btn_save">Salvar Registro</button>
+        </form>
+    </div>
+
+    <!-- 10. MODAL: ADD SAFRA -->
+    <div id="modal-add-safra" class="modal-window fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] bg-surface-container-lowest border border-outline-variant p-6 rounded-2xl w-[90%] max-w-md shadow-2xl hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-headline-md font-bold text-primary" data-i18n="modal_add_safra_title">Cadastrar Nova Safra</h3>
+            <button class="hover:bg-surface-container p-1 rounded-full" onclick="closeModal('modal-add-safra')">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <form onsubmit="handleFormSubmitSafra(event)">
+            <div class="form-group mb-4">
+                <label for="safra-name" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_safra_name">Nome da Safra (ex: Safra Soja 2025/2026)</label>
+                <input type="text" id="safra-name" required placeholder="Ex: Safra Soja 2026/2026" class="form-input"/>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="form-group">
+                    <label for="safra-start" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_safra_start">Data de Início do Período</label>
+                    <input type="date" id="safra-start" required class="form-input"/>
+                </div>
+                <div class="form-group">
+                    <label for="safra-end" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_safra_end">Data de Fim do Período</label>
+                    <input type="date" id="safra-end" required class="form-input"/>
+                </div>
+            </div>
+
+            <div class="form-group mb-6 flex items-center gap-2">
+                <input type="checkbox" id="safra-activate" class="rounded border-outline-variant text-primary focus:ring-primary" checked/>
+                <label for="safra-activate" class="text-xs font-bold text-on-surface-variant" data-i18n="label_safra_activate">Ativar esta safra imediatamente</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-full py-3 font-bold" data-i18n="btn_save">Salvar Registro</button>
+        </form>
     </div>
 
     <!-- Local Protocol Warning for Diagnostics -->

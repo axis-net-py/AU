@@ -6,6 +6,7 @@
     "dev": "vite --port 3000",
     "build": "vite build",
     "preview": "vite preview",
+    "search": "node search.js",
     "postinstall": "chmod +x ./node_modules/.bin/vite"
   },
   "dependencies": {

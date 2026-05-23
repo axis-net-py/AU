@@ -1309,9 +1309,13 @@ function switchTab(tabId) {
     // Trigger safra view rendering
     if (tabId === 'inventario') {
         renderInventarioView();
+        renderSeedsGrains();
     }
     if (tabId === 'safras') {
         renderSafrasView();
+    }
+    if (tabId === 'graos_sementes') {
+        renderSeedsGrains();
     }
 
     // Close mobile side menu if open
@@ -2281,6 +2285,8 @@ function renderAllViews() {
     renderInsumosView();
     renderFinancialView();
     renderInventarioView();
+    renderSeedsGrains();
+    renderSafrasView();
     populateSelectDropdowns();
 }
 
@@ -3092,6 +3098,17 @@ function populateSelectDropdowns() {
             opt.value = p.id;
             opt.textContent = `${p.name} (${p.stock_liters}L)`;
             finPesticideSelect.appendChild(opt);
+        });
+    }
+
+    const seedGrainSafraSelect = document.getElementById('seed-grain-safra');
+    if (seedGrainSafraSelect) {
+        seedGrainSafraSelect.innerHTML = '';
+        db.safras.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.name;
+            seedGrainSafraSelect.appendChild(opt);
         });
     }
 }
@@ -4637,4 +4654,365 @@ window.sendChatTextMessage = sendChatTextMessage;
 window.toggleVoiceInput = toggleVoiceInput;
 window.selectPestSample = selectPestSample;
 window.handlePestPhotoUpload = handlePestPhotoUpload;
+
+// ==================== 14. GRÃOS & SEMENTES & SAFRAS MODULES ====================
+
+function renderSeedsGrains() {
+    const t = translations[currentLanguage];
+    
+    // 1. Render in Inventário table
+    const invTbody = document.getElementById('inv-seeds-grains-tbody');
+    if (invTbody) {
+        invTbody.innerHTML = '';
+        if (!db.seedsGrains || db.seedsGrains.length === 0) {
+            invTbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-on-surface-variant opacity-60">${t.inv_no_data}</td></tr>`;
+        } else {
+            const sorted = [...db.seedsGrains].sort((a, b) => new Date(b.date) - new Date(a.date));
+            sorted.forEach(item => {
+                const d = new Date(item.date + 'T00:00:00');
+                const dateStr = d.toLocaleDateString(currentLanguage === 'pt-BR' ? 'pt-BR' : 'es-PY', { day: 'numeric', month: 'short', year: 'numeric' });
+                const safra = db.safras.find(s => s.id === item.safra_id);
+                const safraName = safra ? safra.name : item.safra_id;
+                const costStr = formatCurrency(item.cost, item.currency);
+                
+                let typeBadge = '';
+                if (item.type === 'Semente Comprada') {
+                    typeBadge = `<span class="bg-primary-container text-on-primary-container text-[9px] px-2 py-0.5 rounded font-bold uppercase">${t.type_seed_bought || item.type}</span>`;
+                } else if (item.type === 'Semente Tratada') {
+                    typeBadge = `<span class="bg-tertiary-container text-on-tertiary-container text-[9px] px-2 py-0.5 rounded font-bold uppercase">${t.type_seed_treated || item.type}</span>`;
+                } else {
+                    typeBadge = `<span class="bg-secondary-container text-on-secondary-container text-[9px] px-2 py-0.5 rounded font-bold uppercase">${t.type_grain_harvested || item.type}</span>`;
+                }
+                
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-surface-container-low transition-colors';
+                tr.innerHTML = `
+                    <td class="p-4 text-on-surface-variant font-semibold">${dateStr}</td>
+                    <td class="p-4">${typeBadge}</td>
+                    <td class="p-4 font-bold text-on-surface">${item.name}</td>
+                    <td class="p-4 font-data-numeral text-primary font-bold">${item.quantity.toLocaleString()} ${item.unit}</td>
+                    <td class="p-4 text-on-surface-variant">${safraName}</td>
+                    <td class="p-4 font-data-numeral text-right font-bold text-on-surface">${costStr}</td>
+                `;
+                invTbody.appendChild(tr);
+            });
+        }
+    }
+    
+    // 2. Render in dedicated Grãos & Sementes table
+    const gsTbody = document.getElementById('seeds-grains-table-body');
+    if (gsTbody) {
+        gsTbody.innerHTML = '';
+        if (!db.seedsGrains || db.seedsGrains.length === 0) {
+            gsTbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-on-surface-variant opacity-60">${t.inv_no_data}</td></tr>`;
+        } else {
+            const sorted = [...db.seedsGrains].sort((a, b) => new Date(b.date) - new Date(a.date));
+            sorted.forEach(item => {
+                const d = new Date(item.date + 'T00:00:00');
+                const dateStr = d.toLocaleDateString(currentLanguage === 'pt-BR' ? 'pt-BR' : 'es-PY', { day: 'numeric', month: 'short', year: 'numeric' });
+                const safra = db.safras.find(s => s.id === item.safra_id);
+                const safraName = safra ? safra.name : item.safra_id;
+                const costStr = formatCurrency(item.cost, item.currency);
+                
+                let typeBadge = '';
+                if (item.type === 'Semente Comprada') {
+                    typeBadge = `<span class="bg-primary-container text-on-primary-container text-[9px] px-2 py-0.5 rounded font-bold uppercase">${t.type_seed_bought || item.type}</span>`;
+                } else if (item.type === 'Semente Tratada') {
+                    typeBadge = `<span class="bg-tertiary-container text-on-tertiary-container text-[9px] px-2 py-0.5 rounded font-bold uppercase">${t.type_seed_treated || item.type}</span>`;
+                } else {
+                    typeBadge = `<span class="bg-secondary-container text-on-secondary-container text-[9px] px-2 py-0.5 rounded font-bold uppercase">${t.type_grain_harvested || item.type}</span>`;
+                }
+                
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-surface-container-low transition-colors';
+                tr.innerHTML = `
+                    <td class="p-4 text-on-surface-variant font-semibold">${dateStr}</td>
+                    <td class="p-4">${typeBadge}</td>
+                    <td class="p-4 font-bold text-on-surface">${item.name}</td>
+                    <td class="p-4 font-data-numeral text-primary font-bold">${item.quantity.toLocaleString()} ${item.unit}</td>
+                    <td class="p-4 text-on-surface-variant">${safraName}</td>
+                    <td class="p-4 font-data-numeral text-right font-bold text-on-surface">${costStr}</td>
+                    <td class="p-4 text-center">
+                        <button class="text-on-surface-variant hover:text-error transition-colors" onclick="deleteSeedGrainItem('${item.id}')" title="Excluir">
+                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                    </td>
+                `;
+                gsTbody.appendChild(tr);
+            });
+        }
+    }
+}
+
+function handleFormSubmitSeedGrain(e) {
+    e.preventDefault();
+    const type = document.getElementById('seed-grain-type').value;
+    const name = document.getElementById('seed-grain-name').value;
+    const qty = parseFloat(document.getElementById('seed-grain-qty').value);
+    const unit = document.getElementById('seed-grain-unit').value;
+    const safraId = document.getElementById('seed-grain-safra').value;
+    const cost = parseFloat(document.getElementById('seed-grain-cost').value);
+    const currency = document.getElementById('seed-grain-currency').value;
+    const autoTx = document.getElementById('seed-grain-auto-tx').checked;
+    
+    if (type && name && qty > 0 && safraId && cost >= 0) {
+        const id = 'sg-' + Date.now();
+        const today = new Date().toISOString().split('T')[0];
+        
+        db.seedsGrains.push({
+            id,
+            type,
+            name,
+            quantity: qty,
+            unit,
+            safra_id: safraId,
+            cost,
+            currency,
+            date: today
+        });
+        
+        if (autoTx) {
+            const txId = 'tx-' + Date.now();
+            const safra = db.safras.find(s => s.id === safraId);
+            const safraName = safra ? safra.name : '';
+            
+            if (type === 'Semente Comprada' || type === 'Grão Colhido') {
+                const txType = type === 'Semente Comprada' ? 'gasto' : 'receita';
+                const txDesc = type === 'Semente Comprada'
+                    ? `${translations[currentLanguage].type_seed_bought || 'Compra Sementes'}: ${name} (${qty} ${unit}) - ${safraName}`
+                    : `${translations[currentLanguage].type_grain_harvested || 'Colheita Grãos'}: ${name} (${qty} ${unit}) - ${safraName}`;
+                
+                db.transactions.push({
+                    id: txId,
+                    date: today,
+                    description: txDesc,
+                    category: type === 'Semente Comprada' ? 'Insumos' : 'Colheita',
+                    type: txType,
+                    amount: cost,
+                    currency,
+                    plot_id: ''
+                });
+            }
+        }
+        
+        saveDatabaseLocally();
+        closeModal('modal-add-semente-grao');
+        renderSeedsGrains();
+        renderInventarioView();
+        
+        const msg = currentLanguage === 'pt-BR' ? 'Registro de semente/grão salvo com sucesso!' : '¡Registro de semilla/grano guardado con éxito!';
+        showToast(msg);
+        
+        e.target.reset();
+    }
+}
+
+function deleteSeedGrainItem(id) {
+    if (confirm(currentLanguage === 'pt-BR' ? 'Tem certeza que deseja remover este registro?' : '¿Está seguro de que desea eliminar este registro?')) {
+        db.seedsGrains = db.seedsGrains.filter(item => item.id !== id);
+        saveDatabaseLocally();
+        renderSeedsGrains();
+        renderInventarioView();
+        showToast(currentLanguage === 'pt-BR' ? 'Registro excluído!' : '¡Registro eliminado!');
+    }
+}
+
+function renderSafrasView() {
+    const t = translations[currentLanguage];
+    const activeSafra = db.safras.find(s => s.status === 'Ativo');
+    let activeSafraExpenses = 0;
+    let activeSafraRevenues = 0;
+    
+    if (activeSafra) {
+        const start = new Date(activeSafra.start_date + 'T00:00:00');
+        const end = new Date(activeSafra.end_date + 'T23:59:59');
+        db.transactions.forEach(tx => {
+            const txDate = new Date(tx.date + 'T00:00:00');
+            if (txDate >= start && txDate <= end) {
+                const valBrl = convertValue(tx.amount, tx.currency, 'BRL');
+                if (tx.type === 'receita') {
+                    activeSafraRevenues += valBrl;
+                } else {
+                    activeSafraExpenses += valBrl;
+                }
+            }
+        });
+    }
+    
+    const activeDashboard = document.getElementById('safra-active-dashboard');
+    if (activeDashboard) {
+        if (!activeSafra) {
+            activeDashboard.innerHTML = `
+                <div class="bg-surface-container-low border border-outline-variant rounded-2xl p-6 text-center shadow-sm">
+                    <span class="material-symbols-outlined text-4xl text-on-surface-variant/50 mb-2">calendar_today</span>
+                    <p class="text-sm font-bold text-on-surface-variant">${currentLanguage === 'pt-BR' ? 'Nenhuma Safra Ativa no momento.' : 'Ninguna Zafra Activa en este momento.'}</p>
+                    <p class="text-xs text-on-surface-variant/80 mt-1">${currentLanguage === 'pt-BR' ? 'Ative ou cadastre uma nova safra na lista abaixo.' : 'Active o registre una nueva zafra en la lista de abajo.'}</p>
+                </div>
+            `;
+        } else {
+            const netVal = activeSafraRevenues - activeSafraExpenses;
+            const netClass = netVal >= 0 ? 'text-primary' : 'text-error';
+            
+            const startD = new Date(activeSafra.start_date + 'T00:00:00');
+            const endD = new Date(activeSafra.end_date + 'T00:00:00');
+            const startStr = startD.toLocaleDateString(currentLanguage === 'pt-BR' ? 'pt-BR' : 'es-PY', { day: 'numeric', month: 'short', year: 'numeric' });
+            const endStr = endD.toLocaleDateString(currentLanguage === 'pt-BR' ? 'pt-BR' : 'es-PY', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            activeDashboard.innerHTML = `
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-md relative overflow-hidden">
+                    <div class="absolute right-0 bottom-0 opacity-[0.03] pointer-events-none transform translate-y-1/4 translate-x-1/4">
+                        <span class="material-symbols-outlined text-[200px]">calendar_today</span>
+                    </div>
+                    <div class="flex justify-between items-start mb-6 flex-wrap gap-4">
+                        <div>
+                            <span class="bg-primary/10 text-primary font-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider">${t.active_safra_badge}</span>
+                            <h3 class="font-headline-md text-primary text-xl font-bold mt-2">${activeSafra.name}</h3>
+                            <p class="text-xs text-on-surface-variant opacity-80 mt-0.5">${t.safra_period}: ${startStr} a ${endStr}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-surface-container-low border border-outline-variant/60 p-4 rounded-xl">
+                            <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${t.safra_expenses}</span>
+                            <span class="font-data-numeral text-lg font-bold text-error block mt-1">${formatCurrency(activeSafraExpenses, 'BRL')}</span>
+                        </div>
+                        <div class="bg-surface-container-low border border-outline-variant/60 p-4 rounded-xl">
+                            <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${t.safra_revenues}</span>
+                            <span class="font-data-numeral text-lg font-bold text-primary block mt-1">${formatCurrency(activeSafraRevenues, 'BRL')}</span>
+                        </div>
+                        <div class="bg-primary-container/20 border border-primary-container p-4 rounded-xl">
+                            <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${t.safra_net}</span>
+                            <span class="font-data-numeral text-lg font-bold ${netClass} block mt-1">${formatCurrency(netVal, 'BRL')}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    const safrasTbody = document.getElementById('safras-table-body');
+    if (safrasTbody) {
+        safrasTbody.innerHTML = '';
+        if (db.safras.length === 0) {
+            safrasTbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-on-surface-variant opacity-60">${t.inv_no_data}</td></tr>`;
+        } else {
+            db.safras.forEach(s => {
+                const startD = new Date(s.start_date + 'T00:00:00');
+                const endD = new Date(s.end_date + 'T00:00:00');
+                const startStr = startD.toLocaleDateString(currentLanguage === 'pt-BR' ? 'pt-BR' : 'es-PY', { day: 'numeric', month: 'short', year: 'numeric' });
+                const endStr = endD.toLocaleDateString(currentLanguage === 'pt-BR' ? 'pt-BR' : 'es-PY', { day: 'numeric', month: 'short', year: 'numeric' });
+                
+                const isActive = s.status === 'Ativo';
+                const statusBadge = isActive
+                    ? `<span class="bg-primary/10 text-primary text-[9px] px-2 py-0.5 rounded font-bold uppercase">${t.active_safra_badge}</span>`
+                    : `<span class="bg-surface-container-high text-on-surface-variant text-[9px] px-2 py-0.5 rounded font-bold uppercase">${t.safra_inactive}</span>`;
+                
+                const activateBtn = isActive
+                    ? ''
+                    : `<button class="btn btn-secondary btn-xs py-1 px-2.5 text-[10px] flex items-center gap-1 font-bold" onclick="activateSafraItem('${s.id}')">
+                         <span class="material-symbols-outlined text-[12px]">check</span>
+                         <span>${t.btn_activate_safra}</span>
+                       </button>`;
+                
+                const deleteBtn = isActive
+                    ? ''
+                    : `<button class="text-on-surface-variant hover:text-error transition-colors" onclick="deleteSafraItem('${s.id}')" title="Excluir">
+                         <span class="material-symbols-outlined text-[18px]">delete</span>
+                       </button>`;
+                
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-surface-container-low transition-colors';
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-on-surface">${s.name}</td>
+                    <td class="p-4 text-on-surface-variant">${startStr} - ${endStr}</td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4">
+                        <div class="flex justify-center items-center gap-2">
+                            ${activateBtn}
+                            ${deleteBtn}
+                        </div>
+                    </td>
+                `;
+                safrasTbody.appendChild(tr);
+            });
+        }
+    }
+}
+
+function handleFormSubmitSafra(e) {
+    e.preventDefault();
+    const name = document.getElementById('safra-name').value;
+    const start = document.getElementById('safra-start').value;
+    const end = document.getElementById('safra-end').value;
+    const activate = document.getElementById('safra-activate').checked;
+    
+    if (name && start && end) {
+        const id = 'safra-' + Date.now();
+        
+        if (activate) {
+            db.safras.forEach(s => {
+                s.status = 'Inativo';
+            });
+        }
+        
+        db.safras.push({
+            id,
+            name,
+            start_date: start,
+            end_date: end,
+            status: activate ? 'Ativo' : 'Inativo'
+        });
+        
+        saveDatabaseLocally();
+        closeModal('modal-add-safra');
+        renderSafrasView();
+        populateSelectDropdowns();
+        
+        const msg = currentLanguage === 'pt-BR' ? 'Safra cadastrada com sucesso!' : '¡Zafra registrada con éxito!';
+        showToast(msg);
+        
+        e.target.reset();
+    }
+}
+
+function deleteSafraItem(id) {
+    const target = db.safras.find(s => s.id === id);
+    if (!target) return;
+    
+    if (target.status === 'Ativo') {
+        showToast(currentLanguage === 'pt-BR' ? 'Não é possível remover a safra ativa!' : '¡No se puede eliminar la zafra activa!', true);
+        return;
+    }
+    
+    if (confirm(currentLanguage === 'pt-BR' ? 'Deseja realmente remover esta safra?' : '¿Realmente deseja eliminar esta zafra?')) {
+        db.safras = db.safras.filter(s => s.id !== id);
+        saveDatabaseLocally();
+        renderSafrasView();
+        populateSelectDropdowns();
+        showToast(currentLanguage === 'pt-BR' ? 'Safra removida!' : '¡Zafra eliminada!');
+    }
+}
+
+function activateSafraItem(id) {
+    db.safras.forEach(s => {
+        if (s.id === id) {
+            s.status = 'Ativo';
+        } else {
+            s.status = 'Inativo';
+        }
+    });
+    
+    saveDatabaseLocally();
+    renderSafrasView();
+    populateSelectDropdowns();
+    showToast(currentLanguage === 'pt-BR' ? 'Safra definida como ativa!' : '¡Zafra definida como activa!');
+}
+
+window.renderSeedsGrains = renderSeedsGrains;
+window.renderSafrasView = renderSafrasView;
+window.handleFormSubmitSeedGrain = handleFormSubmitSeedGrain;
+window.deleteSeedGrainItem = deleteSeedGrainItem;
+window.handleFormSubmitSafra = handleFormSubmitSafra;
+window.deleteSafraItem = deleteSafraItem;
+window.activateSafraItem = activateSafraItem;
 
