@@ -730,114 +730,130 @@
                     </div>
                 </div>
                 
-                <!-- Currency Converter Quick Calculator -->
-                <div class="bg-surface-container border border-outline-variant p-4 sm:p-6 rounded-2xl">
-                    <h3 class="font-headline-md font-bold mb-4 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary">currency_exchange</span>
-                        <span data-i18n="currency_motor_title">Motor Cambial Integrado (Cálculo Rápido)</span>
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="form-group">
-                            <label class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Valor em Dólar (USD)</label>
-                            <div class="input-wrapper">
-                                <span class="input-prefix font-bold text-xs">$</span>
-                                <input type="number" id="calc-usd" class="form-input text-right font-data-numeral" placeholder="100.00" oninput="convertFrom('USD')"/>
-                            </div>
-                        </div>
+                <div class="tabs-subnav flex gap-2 border-b border-outline-variant pb-2">
+                    <button class="tab-subnav-btn active px-4 py-2 font-label-md text-xs rounded-lg transition-all" onclick="switchSubTab('sub-fin-resumo', this)">Resumo & Fluxo</button>
+                    <button class="tab-subnav-btn px-4 py-2 font-label-md text-xs rounded-lg transition-all" onclick="switchSubTab('sub-fin-ledger', this)">Livro Caixa</button>
+                </div>
+
+                <!-- Sub-tab 1: Resumo & Calculadora -->
+                <div id="sub-fin-resumo" class="sub-tab-content active flex flex-col gap-6">
+                    <!-- Currency Converter Quick Calculator -->
+                    <div class="bg-surface-container border border-outline-variant p-4 sm:p-6 rounded-2xl">
+                        <h3 class="font-headline-md font-bold mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">currency_exchange</span>
+                            <span data-i18n="currency_motor_title">Motor Cambial Integrado (Cálculo Rápido)</span>
+                        </h3>
                         
-                        <div class="form-group">
-                            <label class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Valor em Reais (BRL)</label>
-                            <div class="input-wrapper">
-                                <span class="input-prefix font-bold text-xs">R$</span>
-                                <input type="text" id="calc-brl" class="form-input text-right font-data-numeral" placeholder="515,00" oninput="convertFrom('BRL')"/>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="form-group">
+                                <label class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Valor em Dólar (USD)</label>
+                                <div class="input-wrapper">
+                                    <span class="input-prefix font-bold text-xs">$</span>
+                                    <input type="number" id="calc-usd" class="form-input text-right font-data-numeral" placeholder="100.00" oninput="convertFrom('USD')"/>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Valor em Guaranis (PYG)</label>
-                            <div class="input-wrapper">
-                                <span class="input-prefix font-bold text-xs">₲</span>
-                                <input type="text" id="calc-pyg" class="form-input text-right font-data-numeral" placeholder="725.000" oninput="convertFrom('PYG')"/>
+                            
+                            <div class="form-group">
+                                <label class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Valor em Reais (BRL)</label>
+                                <div class="input-wrapper">
+                                    <span class="input-prefix font-bold text-xs">R$</span>
+                                    <input type="text" id="calc-brl" class="form-input text-right font-data-numeral" placeholder="515,00" oninput="convertFrom('BRL')"/>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Valor em Guaranis (PYG)</label>
+                                <div class="input-wrapper">
+                                    <span class="input-prefix font-bold text-xs">₲</span>
+                                    <input type="text" id="calc-pyg" class="form-input text-right font-data-numeral" placeholder="725.000" oninput="convertFrom('PYG')"/>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>                <!-- Bento Grid: Charts & Distributions -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <!-- Monthly Cash Flow Chart (SVG) -->
-                    <div class="lg:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 flex flex-col justify-between">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
-                            <div>
-                                <h3 class="font-headline-md text-on-surface font-bold" data-i18n="chart_title">Fluxo de Caixa Mensal</h3>
-                                <p class="text-xs text-on-surface-variant opacity-80" data-i18n="chart_subtitle">Comparativo de Receitas vs Despesas (BRL)</p>
+
+                    <!-- Bento Grid: Charts & Distributions -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Monthly Cash Flow Chart (SVG) -->
+                        <div class="lg:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 flex flex-col justify-between">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+                                <div>
+                                    <h3 class="font-headline-md text-on-surface font-bold" data-i18n="chart_title">Fluxo de Caixa Mensal</h3>
+                                    <p class="text-xs text-on-surface-variant opacity-80" data-i18n="chart_subtitle">Comparativo de Receitas vs Despesas (BRL)</p>
+                                </div>
+                                <div class="flex gap-4">
+                                    <span class="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                                        <span class="w-3.5 h-3.5 rounded bg-primary"></span>
+                                        <span data-i18n="stats_revenue">Receitas</span>
+                                    </span>
+                                    <span class="flex items-center gap-1.5 text-xs font-semibold text-error">
+                                        <span class="w-3.5 h-3.5 rounded bg-error"></span>
+                                        <span data-i18n="stats_expense">Gastos</span>
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex gap-4">
-                                <span class="flex items-center gap-1.5 text-xs font-semibold text-primary">
-                                    <span class="w-3.5 h-3.5 rounded bg-primary"></span>
-                                    <span data-i18n="stats_revenue">Receitas</span>
-                                </span>
-                                <span class="flex items-center gap-1.5 text-xs font-semibold text-error">
-                                    <span class="w-3.5 h-3.5 rounded bg-error"></span>
-                                    <span data-i18n="stats_expense">Gastos</span>
-                                </span>
+                            
+                            <!-- SVG Chart Wrapper -->
+                            <div class="w-full min-h-[220px] flex items-center justify-center relative mt-2 animate-pulse-slow" id="finance-chart-container">
+                                <!-- SVG generated dynamically by app.js -->
                             </div>
                         </div>
                         
-                        <!-- SVG Chart Wrapper -->
-                        <div class="w-full min-h-[220px] flex items-center justify-center relative mt-2 animate-pulse-slow" id="finance-chart-container">
-                            <!-- SVG generated dynamically by app.js -->
-                        </div>
-                    </div>
-                    
-                    <!-- Expense Category Distribution -->
-                    <div class="lg:col-span-4 bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 flex flex-col">
-                        <div class="mb-4">
-                            <h3 class="font-headline-md text-on-surface font-bold" data-i18n="distribution_title">Resumo por Categoria</h3>
-                            <p class="text-xs text-on-surface-variant opacity-80" data-i18n="distribution_subtitle">Gastos categorizados em BRL</p>
-                        </div>
-                        <div class="flex flex-col gap-4 overflow-y-auto max-h-[220px] custom-scrollbar pr-1 flex-grow" id="category-distribution-container">
-                            <!-- Dynamic category list with progress bars generated by app.js -->
+                        <!-- Expense Category Distribution -->
+                        <div class="lg:col-span-4 bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 flex flex-col">
+                            <div class="mb-4">
+                                <h3 class="font-headline-md text-on-surface font-bold" data-i18n="distribution_title">Resumo por Categoria</h3>
+                                <p class="text-xs text-on-surface-variant opacity-80" data-i18n="distribution_subtitle">Gastos categorizados em BRL</p>
+                            </div>
+                            <div class="flex flex-col gap-4 overflow-y-auto max-h-[220px] custom-scrollbar pr-1 flex-grow" id="category-distribution-container">
+                                <!-- Dynamic category list with progress bars generated by app.js -->
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Transaction Ledger -->
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
-                    <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
-                        <h3 class="font-headline-md font-bold text-on-surface" data-i18n="ledger_title">Livro Caixa & Transações</h3>
-                        <div class="flex gap-4 items-center flex-wrap">
-                            <div class="flex gap-2 items-center text-xs">
-                                <span class="text-on-surface-variant font-label-md" data-i18n="view_in">Exibir Totais em:</span>
-                                <input type="hidden" id="currency-display-filter" value="BRL" />
-                                <div class="currency-pills-container flex bg-surface-container p-0.5 rounded-lg border border-outline-variant">
-                                    <button type="button" id="btn-currency-brl" class="tab-subnav-btn active px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('BRL', this)">BRL (R$)</button>
-                                    <button type="button" id="btn-currency-usd" class="tab-subnav-btn px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('USD', this)">USD ($)</button>
-                                    <button type="button" id="btn-currency-pyg" class="tab-subnav-btn px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('PYG', this)">PYG (₲)</button>
+                <!-- Sub-tab 2: Livro Caixa -->
+                <div id="sub-fin-ledger" class="sub-tab-content flex flex-col gap-4 hidden">
+                    <!-- Transaction Ledger -->
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 pb-2 border-b border-outline-variant/30">
+                            <h3 class="font-headline-md font-bold text-on-surface text-lg flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-[20px]">payments</span>
+                                <span data-i18n="ledger_title">Livro Caixa & Transações</span>
+                            </h3>
+                            <div class="flex gap-4 items-center flex-wrap">
+                                <div class="flex gap-2 items-center text-xs">
+                                    <span class="text-on-surface-variant font-label-md" data-i18n="view_in">Exibir Totais em:</span>
+                                    <input type="hidden" id="currency-display-filter" value="BRL" />
+                                    <div class="currency-pills-container flex bg-surface-container p-0.5 rounded-lg border border-outline-variant">
+                                        <button type="button" id="btn-currency-brl" class="tab-subnav-btn active px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('BRL', this)">BRL (R$)</button>
+                                        <button type="button" id="btn-currency-usd" class="tab-subnav-btn px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('USD', this)">USD ($)</button>
+                                        <button type="button" id="btn-currency-pyg" class="tab-subnav-btn px-3 py-1.5 font-label-md text-xs rounded-md transition-all" onclick="setCurrencyDisplayFilter('PYG', this)">PYG (₲)</button>
+                                    </div>
                                 </div>
+                                <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-financa')">
+                                    <span class="material-symbols-outlined text-[18px]">add</span>
+                                    <span data-i18n="btn_add_financa">Lançar Movimento</span>
+                                </button>
                             </div>
-                            <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-financa')">
-                                <span class="material-symbols-outlined text-[18px]">add</span>
-                                <span data-i18n="btn_add_financa">Lançar Movimento</span>
-                            </button>
                         </div>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs min-w-[700px]">
-                            <thead>
-                                <tr class="border-b border-outline-variant font-label-md text-on-surface-variant uppercase tracking-wider">
-                                    <th class="p-4" data-i18n="th_date">Data</th>
-                                    <th class="p-4" data-i18n="th_desc">Descrição</th>
-                                    <th class="p-4" data-i18n="th_category">Categoria</th>
-                                    <th class="p-4 text-right" data-i18n="th_amount_original">Valor Original</th>
-                                    <th class="p-4 text-right" data-i18n="th_amount_converted">Valor Convertido</th>
-                                    <th class="p-4 text-center" data-i18n="th_actions">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ledger-table-body" class="divide-y divide-outline-variant">
-                                <!-- Dinamicamente preenchido pelo app.js -->
-                            </tbody>
-                        </table>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs min-w-[700px]">
+                                <thead>
+                                    <tr class="border-b border-outline-variant font-label-md text-on-surface-variant uppercase tracking-wider">
+                                        <th class="p-4" data-i18n="th_date">Data</th>
+                                        <th class="p-4" data-i18n="th_desc">Descrição</th>
+                                        <th class="p-4" data-i18n="th_category">Categoria</th>
+                                        <th class="p-4 text-right" data-i18n="th_amount_original">Valor Original</th>
+                                        <th class="p-4 text-right" data-i18n="th_amount_converted">Valor Convertido</th>
+                                        <th class="p-4 text-center" data-i18n="th_actions">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ledger-table-body" class="divide-y divide-outline-variant">
+                                    <!-- Dinamicamente preenchido pelo app.js -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -851,30 +867,89 @@
                     </div>
                 </div>
 
-                <!-- KPI Summary Cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <!-- Pesticides KPI -->
-                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 flex items-center gap-4 hover:scale-[1.02] transition-all">
-                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-primary text-2xl">science</span>
+                <div class="tabs-subnav flex gap-2 border-b border-outline-variant pb-2">
+                    <button class="tab-subnav-btn active px-4 py-2 font-label-md text-xs rounded-lg transition-all" onclick="switchSubTab('sub-inv-insumos', this)">Insumos & Tanque</button>
+                    <button class="tab-subnav-btn px-4 py-2 font-label-md text-xs rounded-lg transition-all" onclick="switchSubTab('sub-inv-sementes', this)">Sementes & Grãos</button>
+                    <button class="tab-subnav-btn px-4 py-2 font-label-md text-xs rounded-lg transition-all" onclick="switchSubTab('sub-inv-compras', this)">Histórico de Compras</button>
+                </div>
+
+                <!-- Sub-tab 1: Insumos & Tanque -->
+                <div id="sub-inv-insumos" class="sub-tab-content active flex flex-col gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Pesticides KPI -->
+                        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 flex items-center gap-4 hover:scale-[1.02] transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-primary text-2xl">science</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-on-surface-variant uppercase" data-i18n="inv_total_pesticides">Total Defensivos</p>
+                                <p class="font-data-numeral text-xl font-bold text-primary" id="inv-kpi-total-pesticides">— L</p>
+                                <p class="text-[10px] font-bold" id="inv-kpi-low-pesticides"></p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-on-surface-variant uppercase" data-i18n="inv_total_pesticides">Total Defensivos</p>
-                            <p class="font-data-numeral text-xl font-bold text-primary" id="inv-kpi-total-pesticides">— L</p>
-                            <p class="text-[10px] font-bold" id="inv-kpi-low-pesticides"></p>
+                        <!-- Fuel KPI -->
+                        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 flex items-center gap-4 hover:scale-[1.02] transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-tertiary/10 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-tertiary text-2xl">local_gas_station</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-on-surface-variant uppercase" data-i18n="inv_total_fuel">Nível do Tanque</p>
+                                <p class="font-data-numeral text-xl font-bold text-tertiary" id="inv-kpi-fuel-level">— L</p>
+                                <p class="text-[10px] text-on-surface-variant" id="inv-kpi-fuel-pct"></p>
+                            </div>
                         </div>
                     </div>
-                    <!-- Fuel KPI -->
-                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 flex items-center gap-4 hover:scale-[1.02] transition-all">
-                        <div class="w-12 h-12 rounded-xl bg-tertiary/10 flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-tertiary text-2xl">local_gas_station</span>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-on-surface-variant uppercase" data-i18n="inv_total_fuel">Nível do Tanque</p>
-                            <p class="font-data-numeral text-xl font-bold text-tertiary" id="inv-kpi-fuel-level">— L</p>
-                            <p class="text-[10px] text-on-surface-variant" id="inv-kpi-fuel-pct"></p>
+
+                    <!-- Pesticides Table -->
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
+                        <h3 class="font-headline-md font-bold mb-4 flex items-center gap-2 text-on-surface">
+                            <span class="material-symbols-outlined text-primary text-[20px]">science</span>
+                            <span data-i18n="inv_sect_pesticides">Defensivos Químicos</span>
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs min-w-[600px]">
+                                <thead>
+                                    <tr class="border-b border-outline-variant font-label-md text-on-surface-variant uppercase tracking-wider">
+                                        <th class="p-4" data-i18n="inv_item_name">Produto</th>
+                                        <th class="p-4" data-i18n="inv_item_type">Tipo</th>
+                                        <th class="p-4" data-i18n="inv_item_qty">Quantidade</th>
+                                        <th class="p-4" data-i18n="inv_item_status">Status</th>
+                                        <th class="p-4" data-i18n="inv_item_cost">Custo Total Registrado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inv-pesticides-tbody" class="divide-y divide-outline-variant">
+                                    <!-- Dinamicamente preenchido pelo app.js -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
+
+                    <!-- Fuel Logs Table -->
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
+                        <h3 class="font-headline-md font-bold mb-4 flex items-center gap-2 text-on-surface">
+                            <span class="material-symbols-outlined text-tertiary text-[20px]">local_gas_station</span>
+                            <span data-i18n="inv_sect_fuel">Combustível (Diesel)</span>
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs min-w-[550px]">
+                                <thead>
+                                    <tr class="border-b border-outline-variant font-label-md text-on-surface-variant uppercase tracking-wider">
+                                        <th class="p-4" data-i18n="th_date">Data</th>
+                                        <th class="p-4" data-i18n="th_desc">Descrição</th>
+                                        <th class="p-4" data-i18n="th_liters">Quantidade (L)</th>
+                                        <th class="p-4 text-right" data-i18n="th_cost">Custo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inv-fuel-tbody" class="divide-y divide-outline-variant">
+                                    <!-- Dinamicamente preenchido pelo app.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-tab 2: Sementes & Grãos -->
+                <div id="sub-inv-sementes" class="sub-tab-content flex flex-col gap-6 hidden">
                     <!-- Harvest KPI -->
                     <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 flex items-center gap-4 hover:scale-[1.02] transition-all">
                         <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center flex-shrink-0">
@@ -886,107 +961,63 @@
                             <p class="text-[10px] text-on-surface-variant">Receitas de colheita</p>
                         </div>
                     </div>
-                </div>
 
-                <!-- Pesticides Table -->
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
-                    <h3 class="font-headline-md font-bold mb-4 flex items-center gap-2 text-on-surface">
-                        <span class="material-symbols-outlined text-primary text-[20px]">science</span>
-                        <span data-i18n="inv_sect_pesticides">Defensivos Químicos</span>
-                    </h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs min-w-[600px]">
-                            <thead>
-                                <tr class="border-b border-outline-variant font-label-md text-on-surface-variant uppercase tracking-wider">
-                                    <th class="p-4" data-i18n="inv_item_name">Produto</th>
-                                    <th class="p-4" data-i18n="inv_item_type">Tipo</th>
-                                    <th class="p-4" data-i18n="inv_item_qty">Quantidade</th>
-                                    <th class="p-4" data-i18n="inv_item_status">Status</th>
-                                    <th class="p-4" data-i18n="inv_item_cost">Custo Total Registrado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inv-pesticides-tbody" class="divide-y divide-outline-variant">
-                                <!-- Dinamicamente preenchido pelo app.js -->
-                            </tbody>
-                        </table>
+                    <!-- Sementes & Grãos Table -->
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 pb-2 border-b border-outline-variant/30">
+                            <h3 class="font-headline-md font-bold text-on-surface text-lg flex items-center gap-2">
+                                <span class="material-symbols-outlined text-secondary text-[20px]">grain</span>
+                                <span data-i18n="inv_sect_seeds_grains">Sementes & Grãos em Estoque</span>
+                            </h3>
+                            <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-semente-grao')">
+                                <span class="material-symbols-outlined text-[18px]">add</span>
+                                <span data-i18n="btn_add_seed_grain">Novo Registro</span>
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs min-w-[600px]">
+                                <thead>
+                                    <tr class="border-b border-outline-variant font-label-md text-on-surface-variant uppercase tracking-wider">
+                                        <th class="p-4" data-i18n="th_date">Data</th>
+                                        <th class="p-4" data-i18n="label_seed_grain_type">Tipo de Registro</th>
+                                        <th class="p-4" data-i18n="inv_item_name">Produto / Variedade</th>
+                                        <th class="p-4" data-i18n="inv_item_qty">Quantidade</th>
+                                        <th class="p-4" data-i18n="label_seed_grain_safra">Safra Relacionada</th>
+                                        <th class="p-4 text-right" data-i18n="th_cost">Custo / Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inv-seeds-grains-tbody" class="divide-y divide-outline-variant">
+                                    <!-- Dinamicamente preenchido pelo app.js -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Fuel Logs Table -->
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
-                    <h3 class="font-headline-md font-bold mb-4 flex items-center gap-2 text-on-surface">
-                        <span class="material-symbols-outlined text-tertiary text-[20px]">local_gas_station</span>
-                        <span data-i18n="inv_sect_fuel">Combustível (Diesel)</span>
-                    </h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs min-w-[550px]">
-                            <thead>
-                                <tr class="border-b border-outline-variant font-label-md text-on-surface-variant uppercase tracking-wider">
-                                    <th class="p-4" data-i18n="th_date">Data</th>
-                                    <th class="p-4" data-i18n="th_desc">Descrição</th>
-                                    <th class="p-4" data-i18n="th_liters">Quantidade (L)</th>
-                                    <th class="p-4 text-right" data-i18n="th_cost">Custo</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inv-fuel-tbody" class="divide-y divide-outline-variant">
-                                <!-- Dinamicamente preenchido pelo app.js -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Sementes & Grãos Table -->
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 pb-2 border-b border-outline-variant/30">
-                        <h3 class="font-headline-md font-bold text-on-surface text-lg flex items-center gap-2">
-                            <span class="material-symbols-outlined text-secondary text-[20px]">grain</span>
-                            <span data-i18n="inv_sect_seeds_grains">Sementes & Grãos em Estoque</span>
+                <!-- Sub-tab 3: Livro de Compras -->
+                <div id="sub-inv-compras" class="sub-tab-content flex flex-col gap-6 hidden">
+                    <!-- Purchases History Table -->
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
+                        <h3 class="font-headline-md font-bold mb-4 flex items-center gap-2 text-on-surface">
+                            <span class="material-symbols-outlined text-secondary text-[20px]">receipt_long</span>
+                            <span data-i18n="inv_sect_purchases">Histórico de Todas as Compras / Despesas</span>
                         </h3>
-                        <button class="btn btn-primary btn-sm flex items-center justify-center gap-1.5 shrink-0 shadow-sm hover:shadow" onclick="openModal('modal-add-semente-grao')">
-                            <span class="material-symbols-outlined text-[18px]">add</span>
-                            <span data-i18n="btn_add_seed_grain">Novo Registro</span>
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs min-w-[600px]">
-                            <thead>
-                                <tr class="border-b border-outline-variant font-label-md text-on-surface-variant uppercase tracking-wider">
-                                    <th class="p-4" data-i18n="th_date">Data</th>
-                                    <th class="p-4" data-i18n="label_seed_grain_type">Tipo de Registro</th>
-                                    <th class="p-4" data-i18n="inv_item_name">Produto / Variedade</th>
-                                    <th class="p-4" data-i18n="inv_item_qty">Quantidade</th>
-                                    <th class="p-4" data-i18n="label_seed_grain_safra">Safra Relacionada</th>
-                                    <th class="p-4 text-right" data-i18n="th_cost">Custo / Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inv-seeds-grains-tbody" class="divide-y divide-outline-variant">
-                                <!-- Dinamicamente preenchido pelo app.js -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Purchases History Table -->
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6">
-                    <h3 class="font-headline-md font-bold mb-4 flex items-center gap-2 text-on-surface">
-                        <span class="material-symbols-outlined text-secondary text-[20px]">receipt_long</span>
-                        <span data-i18n="inv_sect_purchases">Histórico de Todas as Compras / Despesas</span>
-                    </h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs min-w-[680px]">
-                            <thead>
-                                <tr class="border-b border-outline-variant font-label-md text-on-surface-variant uppercase tracking-wider">
-                                    <th class="p-4" data-i18n="th_date">Data</th>
-                                    <th class="p-4" data-i18n="th_desc">Descrição / Item</th>
-                                    <th class="p-4">Categoria</th>
-                                    <th class="p-4 text-right" data-i18n="th_amount_original">Valor Original</th>
-                                    <th class="p-4 text-right" data-i18n="th_amount_converted">Equiv. BRL</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inv-purchases-tbody" class="divide-y divide-outline-variant">
-                                <!-- Dinamicamente preenchido pelo app.js -->
-                            </tbody>
-                        </table>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs min-w-[680px]">
+                                <thead>
+                                    <tr class="border-b border-outline-variant font-label-md text-on-surface-variant uppercase tracking-wider">
+                                        <th class="p-4" data-i18n="th_date">Data</th>
+                                        <th class="p-4" data-i18n="th_desc">Descrição / Item</th>
+                                        <th class="p-4">Categoria</th>
+                                        <th class="p-4 text-right" data-i18n="th_amount_original">Valor Original</th>
+                                        <th class="p-4 text-right" data-i18n="th_amount_converted">Equiv. BRL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inv-purchases-tbody" class="divide-y divide-outline-variant">
+                                    <!-- Dinamicamente preenchido pelo app.js -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </section>

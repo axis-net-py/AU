@@ -11,5 +11,4 @@ function findOccurrences(fileContent, fileName, searchStr) {
     });
 }
 
-findOccurrences(appJs, 'app.js', 'function convertValue');
-
+findOccurrences(appJs, 'app.js', 'function detectDeviceLayout');
