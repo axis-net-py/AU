@@ -1953,6 +1953,9 @@ async function fetchDatabaseFromCloud(userId) {
                 updateCloudSyncUI('synced');
             } else if (error.code === 'PGRST205' || error.code === '42P01') {
                 console.warn("Supabase table 'agrimanage_data' does not exist in schema. Gracefully falling back to local mode.");
+                showToast(currentLanguage === 'pt-BR' 
+                    ? 'Erro: Tabela "agrimanage_data" ausente no banco de dados Supabase!' 
+                    : 'Error: ¡Tabla "agrimanage_data" ausente en la base de datos de Supabase!', true);
                 updateCloudSyncUI('local');
             } else {
                 console.error("Error fetching database from cloud:", error);
@@ -2047,6 +2050,15 @@ async function syncDatabaseToCloud() {
             
         if (error) {
             console.error("Cloud database sync error:", error);
+            if (error.code === 'PGRST205' || error.code === '42P01') {
+                showToast(currentLanguage === 'pt-BR' 
+                    ? 'Erro de Sincronização: Tabela "agrimanage_data" ausente no Supabase!' 
+                    : 'Error de Sincronización: ¡Tabla "agrimanage_data" ausente en Supabase!', true);
+            } else {
+                showToast(currentLanguage === 'pt-BR' 
+                    ? 'Erro ao sincronizar dados com o Supabase!' 
+                    : '¡Error al sincronizar datos con Supabase!', true);
+            }
             updateCloudSyncUI('local');
         } else {
             updateCloudSyncUI('synced');

@@ -130,6 +130,10 @@
     <!-- ================= AUTH CONTAINER ================= -->
     <div id="auth-screen" class="fixed inset-0 z-[100] flex items-start sm:items-center justify-center bg-gradient-to-br py-8 px-4 overflow-y-auto">
         <div class="auth-card w-full max-w-md bg-surface-container-lowest border border-outline-variant p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+            <button id="auth-config-toggle" class="absolute top-4 right-4 text-on-surface-variant/75 hover:text-primary transition-all p-1.5 rounded-lg bg-surface-container/30 border border-outline-variant/50 hover:bg-primary/10 hover:border-primary flex items-center justify-center" onclick="toggleAuthSupabaseDrawer()" title="Configurar Supabase">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+            </button>
+
             <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-primary/10 blur-xl"></div>
             <div class="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-tertiary-container/10 blur-xl"></div>
             
@@ -180,6 +184,35 @@
             
             <div class="mt-6 text-center text-body-sm text-on-surface-variant opacity-60">
                 <span data-i18n="auth_note">© 2026 AXIS - Soluciones Digitales.<br>Todos los derechos reservados.</span>
+            </div>
+
+            <!-- Supabase Config Drawer -->
+            <div id="auth-supabase-drawer" class="hidden absolute inset-0 bg-surface-container-lowest/95 backdrop-blur-md p-6 flex flex-col justify-center z-20">
+                <div class="mb-4">
+                    <h3 class="font-headline-md text-primary font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-xl">cloud_sync</span>
+                        <span>Configurar Supabase</span>
+                    </h3>
+                    <p class="text-xs text-on-surface-variant mt-1">Conecte sua própria base de dados para sincronização em nuvem.</p>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <div class="form-group">
+                        <label for="auth-sb-url" class="block text-xs font-bold mb-1.5 uppercase text-on-surface-variant">URL do Supabase</label>
+                        <input type="text" id="auth-sb-url" class="form-input w-full font-label-md" placeholder="https://xxxx.supabase.co" />
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-sb-key" class="block text-xs font-bold mb-1.5 uppercase text-on-surface-variant">Chave Anon (Public API Key)</label>
+                        <input type="password" id="auth-sb-key" class="form-input w-full font-label-md" placeholder="sua-chave-anon-public-key" />
+                    </div>
+                    <div class="flex gap-3 mt-2">
+                        <button type="button" class="btn btn-primary flex-1 py-2.5 text-sm font-semibold" onclick="saveAuthSupabaseSettings()">
+                            Salvar
+                        </button>
+                        <button type="button" class="btn btn-outline border border-outline-variant text-on-surface hover:bg-surface-container/50 px-4 py-2.5 text-sm font-semibold rounded-xl" onclick="toggleAuthSupabaseDrawer()">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1193,10 +1226,7 @@
                     <p class="font-body-md text-on-surface-variant" data-i18n="config_subtitle">Gerencie suas informações de perfil, taxas de câmbio e ajustes do sistema.</p>
                 </div>
 
-                <!-- Hidden inputs to preserve compatibility with Supabase background syncing -->
-                <input type="hidden" id="cfg-supabase-url"/>
-                <input type="hidden" id="cfg-supabase-key"/>
-                <button id="btn-disconnect-sb" class="hidden"></button>
+
 
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                     <!-- Perfil do Produtor Panel -->
@@ -1281,6 +1311,37 @@
                                 <button class="btn btn-primary flex-grow py-2.5 flex items-center justify-center gap-2 font-bold shadow-md hover:shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]" onclick="updateExchangeRatesRealTime(false)" id="btn-sync-rates-realtime">
                                     <span class="material-symbols-outlined text-[18px] animate-spin-slow">sync</span>
                                     <span data-i18n="btn_sync_rates_realtime">Obter Câmbio Real</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Supabase Sincronização Panel -->
+                        <div class="bg-surface-container-low border border-outline-variant rounded-2xl p-6 shadow-sm flex flex-col gap-4">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-primary text-2xl font-bold">cloud_sync</span>
+                                <h3 class="font-headline-md font-bold text-on-surface" data-i18n="cfg_supabase_title">Sincronização Supabase</h3>
+                            </div>
+                            
+                            <p class="text-xs text-on-surface-variant" data-i18n="cfg_supabase_desc">
+                                Conecte uma base de dados em nuvem para salvar e carregar seus dados automaticamente de qualquer dispositivo.
+                            </p>
+
+                            <div class="form-group">
+                                <label for="cfg-supabase-url" class="block text-xs font-bold mb-1.5 uppercase text-on-surface-variant">URL do Supabase</label>
+                                <input type="text" id="cfg-supabase-url" class="form-input w-full font-label-md" placeholder="https://xxxx.supabase.co" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cfg-supabase-key" class="block text-xs font-bold mb-1.5 uppercase text-on-surface-variant">Chave Anon (Public API Key)</label>
+                                <input type="password" id="cfg-supabase-key" class="form-input w-full font-label-md" placeholder="sua-chave-anon-public-key" />
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row gap-2 mt-2">
+                                <button class="btn btn-primary flex-grow py-2.5 font-bold shadow-md hover:shadow-lg transition-all" onclick="saveSupabaseSettings()">
+                                    Salvar & Conectar
+                                </button>
+                                <button id="btn-disconnect-sb" class="btn btn-secondary flex-grow py-2.5 font-bold text-error border border-error/20 hover:bg-error/10 hover:border-error/50 transition-all rounded-xl hidden" onclick="disconnectSupabase()">
+                                    Desconectar
                                 </button>
                             </div>
                         </div>
