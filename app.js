@@ -265,7 +265,37 @@ const translations = {
         mach_pickup: 'Camionete / Utilitário',
         mach_silage: 'Ensiladeira',
         mach_spreader: 'Distribuidor de Calcário/Adubo',
-        th_amount_converted: 'Equiv. BRL'
+        th_amount_converted: 'Equiv. BRL',
+        nav_relatorios: 'Relatórios & Análises',
+        tab_relatorios: 'Relatórios',
+        relatorios_title: 'Relatórios & Análises',
+        relatorios_subtitle: 'Gere relatórios de caixa, insumos, combustível, colheitas e cadastros.',
+        btn_print: 'Imprimir Relatório',
+        btn_generate: 'Gerar Relatório',
+        ai_command_placeholder: 'IA: "Relatório de gastos de caixa no talhão 1 em maio"',
+        lbl_module: 'Módulo do Relatório',
+        lbl_start_date: 'Data Inicial',
+        lbl_end_date: 'Data Final',
+        lbl_related_item: 'Filtro de Item Específico',
+        lbl_quick_ranges: 'Períodos Rápidos',
+        lbl_generate_ai: 'Executar Comando IA',
+        btn_execute: 'Executar',
+        report_empty: 'Nenhum registro encontrado para os filtros selecionados.',
+        rep_total_revenue: 'Receitas Totais',
+        rep_total_expense: 'Gastos Totais',
+        rep_net_balance: 'Saldo Líquido',
+        rep_total_liters: 'Diesel Total (L)',
+        rep_avg_consumption: 'Consumo Médio (L)',
+        rep_total_cost: 'Custo Total',
+        rep_total_applied: 'Total Aplicado (L)',
+        rep_avg_applied: 'Média por Aplicação (L)',
+        rep_total_bags: 'Produção Total (Sacas)',
+        rep_total_weight: 'Peso Estimado (Kg)',
+        rep_count: 'Total Registrado',
+        rep_active_plots: 'Talhões Ativos',
+        rep_active_machinery: 'Máquinas Ativas',
+        rep_active_staff: 'Funcionários Ativos',
+        rep_all: 'Todos'
     },
     'es-PY': {
         auth_title: 'Aurelius',
@@ -527,7 +557,37 @@ const translations = {
         mach_pickup: 'Camioneta / Utilitario',
         mach_silage: 'Ensiladora',
         mach_spreader: 'Distribuidor de Cal/Abono',
-        th_amount_converted: 'Equiv. BRL'
+        th_amount_converted: 'Equiv. BRL',
+        nav_relatorios: 'Reportes & Análisis',
+        tab_relatorios: 'Reportes',
+        relatorios_title: 'Reportes & Análisis',
+        relatorios_subtitle: 'Genere reportes de caja, insumos, gasoil, cosechas y registros.',
+        btn_print: 'Imprimir Reporte',
+        btn_generate: 'Generar Reporte',
+        ai_command_placeholder: 'IA: "Reporte de gastos de caja en el lote 1 en mayo"',
+        lbl_module: 'Módulo del Reporte',
+        lbl_start_date: 'Fecha Inicial',
+        lbl_end_date: 'Fecha Final',
+        lbl_related_item: 'Filtro de Item Específico',
+        lbl_quick_ranges: 'Períodos Rápidos',
+        lbl_generate_ai: 'Ejecutar Comando IA',
+        btn_execute: 'Ejecutar',
+        report_empty: 'No se encontraron registros para los filtros seleccionados.',
+        rep_total_revenue: 'Ingresos Totales',
+        rep_total_expense: 'Egresos Totales',
+        rep_net_balance: 'Saldo Neto',
+        rep_total_liters: 'Gasoil Total (L)',
+        rep_avg_consumption: 'Consumo Promedio (L)',
+        rep_total_cost: 'Custo Total',
+        rep_total_applied: 'Total Aplicado (L)',
+        rep_avg_applied: 'Promedio por Aplicación (L)',
+        rep_total_bags: 'Producción Total (Sacos)',
+        rep_total_weight: 'Peso Estimado (Kg)',
+        rep_count: 'Total Registrado',
+        rep_active_plots: 'Lotes Activos',
+        rep_active_machinery: 'Máquinas Activas',
+        rep_active_staff: 'Personal Activo',
+        rep_all: 'Todos'
     }
 };
 
@@ -1293,7 +1353,7 @@ function switchTab(tabId) {
     
     // Match Sidebar Buttons
     document.querySelectorAll('#desktop-sidebar nav button').forEach((btn, index) => {
-        const tabs = ['dashboard', 'safras', 'talhoes', 'recursos', 'insumos', 'graos_sementes', 'financeiro', 'inventario'];
+        const tabs = ['dashboard', 'safras', 'talhoes', 'recursos', 'insumos', 'graos_sementes', 'financeiro', 'inventario', 'relatorios'];
         if (tabs[index] === tabId) {
             btn.classList.add('active');
         }
@@ -1301,7 +1361,7 @@ function switchTab(tabId) {
 
     // Match Mobile Tab bar Buttons
     document.querySelectorAll('#mobile-tabbar button').forEach((btn, index) => {
-        const tabs = ['dashboard', 'talhoes', 'recursos', 'insumos', 'financeiro', 'inventario'];
+        const tabs = ['dashboard', 'talhoes', 'recursos', 'insumos', 'financeiro', 'inventario', 'relatorios'];
         if (tabs[index] === tabId) {
             btn.classList.add('active');
         }
@@ -1318,6 +1378,9 @@ function switchTab(tabId) {
     }
     if (tabId === 'graos_sementes') {
         renderSeedsGrains();
+    }
+    if (tabId === 'relatorios') {
+        initRelatoriosView();
     }
 
     // Close mobile side menu if open
@@ -3248,7 +3311,7 @@ function handleFormSubmitFuel(e) {
         const id = 'fuel-' + (db.fuelLogs.length + 1);
         const date = new Date().toISOString().split('T')[0];
         
-        db.fuelLogs.unshift({ id, date, desc, amount_liters: liters, cost_value: cost, currency });
+        db.fuelLogs.unshift({ id, date, desc, amount_liters: liters, cost_value: cost, currency, mach_id: machId });
         
         // If refueling specific machine, fill machine tank!
         if (machId) {
@@ -3695,6 +3758,20 @@ function processAICommand(text) {
     
     // ==================== 0. EXTENDED DIRECT ENTITY VOICE COMMANDS ====================
     const isPt = currentLanguage === 'pt-BR';
+    
+    // 0.0 REPORT MODULE IA GENERATION
+    if (cleanText.includes('relatório') || cleanText.includes('relatorio') || cleanText.includes('reporte') || cleanText.includes('reportes') || cleanText.includes('imprimir relatório') || cleanText.includes('imprimir reporte')) {
+        const parsed = parseAndApplyReportFilters(text);
+        if (parsed) {
+            switchTab('relatorios');
+            const responseText = isPt
+                ? `📄 **Relatório Gerado!** Mudei você para a aba de **Relatórios & Análises** e apliquei os filtros baseados no seu comando: *"${text}"*.`
+                : `📄 **¡Reporte Generado!** Le he llevado a la pestaña de **Reportes & Análisis** y apliqué los filtros correspondientes basados en su comando: *"${text}"*.`;
+            addMessageToChat(responseText);
+            speakResponseText(isPt ? 'Relatório gerado com sucesso.' : 'Reporte generado con éxito.');
+            return;
+        }
+    }
     
     // 0.1 CREATE PLOT / TALHÃO / LOTE
     if (
@@ -5329,4 +5406,1072 @@ window.deleteSeedGrainItem = deleteSeedGrainItem;
 window.handleFormSubmitSafra = handleFormSubmitSafra;
 window.deleteSafraItem = deleteSafraItem;
 window.activateSafraItem = activateSafraItem;
+
+// Reports module bindings
+window.initRelatoriosView = initRelatoriosView;
+window.onReportModuleChange = onReportModuleChange;
+window.setReportQuickRange = setReportQuickRange;
+window.printActiveReport = printActiveReport;
+window.triggerManualReportGeneration = triggerManualReportGeneration;
+window.toggleReportVoiceInput = toggleReportVoiceInput;
+window.executeReportAICommand = executeReportAICommand;
+window.handleReportAIKey = handleReportAIKey;
+window.parseAndApplyReportFilters = parseAndApplyReportFilters;
+
+// ==================== 14. REPORTS AND ANALYTICS ENGINE ====================
+let reportsInitialized = false;
+
+function initRelatoriosView() {
+    if (!reportsInitialized) {
+        const startInput = document.getElementById('report-start-date');
+        const endInput = document.getElementById('report-end-date');
+        if (startInput && endInput) {
+            startInput.value = '2026-05-01';
+            endInput.value = '2026-05-31';
+        }
+        
+        const moduleSelect = document.getElementById('report-module-select');
+        if (moduleSelect) {
+            moduleSelect.value = 'financeiro';
+        }
+        
+        reportsInitialized = true;
+    }
+    
+    onReportModuleChange();
+}
+
+function onReportModuleChange() {
+    const moduleSelect = document.getElementById('report-module-select');
+    if (!moduleSelect) return;
+    const module = moduleSelect.value;
+    
+    populateReportEntitySelect(module);
+    triggerManualReportGeneration();
+}
+
+function populateReportEntitySelect(module) {
+    const entitySelect = document.getElementById('report-entity-select');
+    if (!entitySelect) return;
+    
+    entitySelect.innerHTML = '';
+    
+    const optAll = document.createElement('option');
+    optAll.value = 'all';
+    optAll.textContent = currentLanguage === 'pt-BR' ? 'Todos / Geral' : 'Todos / General';
+    entitySelect.appendChild(optAll);
+    
+    if (module === 'financeiro') {
+        const catGroup = document.createElement('optgroup');
+        catGroup.label = currentLanguage === 'pt-BR' ? 'Categorias de Caixa' : 'Categorias de Caja';
+        
+        const categories = [
+            { val: 'cat-gasto-Combustível', name: currentLanguage === 'pt-BR' ? 'Gasto: Combustível' : 'Egreso: Gasoil' },
+            { val: 'cat-gasto-Defensivos', name: currentLanguage === 'pt-BR' ? 'Gasto: Defensivos/Insumos' : 'Egreso: Defensivos' },
+            { val: 'cat-gasto-Mão de Obra', name: currentLanguage === 'pt-BR' ? 'Gasto: Colaboradores/Salários' : 'Egreso: Personal/Jornal' },
+            { val: 'cat-gasto-Outras Operações', name: currentLanguage === 'pt-BR' ? 'Gasto: Outros Custos' : 'Egreso: Otras Operaciones' },
+            { val: 'cat-receita-Colheita', name: currentLanguage === 'pt-BR' ? 'Receita: Venda de Grãos/Colheita' : 'Ingreso: Venta de Granos' },
+            { val: 'cat-receita-Outras Operações', name: currentLanguage === 'pt-BR' ? 'Receita: Outras Entradas' : 'Ingreso: Otras Operaciones' }
+        ];
+        
+        categories.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.val;
+            opt.textContent = c.name;
+            catGroup.appendChild(opt);
+        });
+        entitySelect.appendChild(catGroup);
+        
+        const plotGroup = document.createElement('optgroup');
+        plotGroup.label = currentLanguage === 'pt-BR' ? 'Filtrar por Talhão' : 'Filtrar por Lote';
+        db.plots.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = `plot-${p.id}`;
+            opt.textContent = p.name;
+            plotGroup.appendChild(opt);
+        });
+        entitySelect.appendChild(plotGroup);
+        
+    } else if (module === 'insumos') {
+        const pestGroup = document.createElement('optgroup');
+        pestGroup.label = currentLanguage === 'pt-BR' ? 'Produtos Defensivos' : 'Agroquímicos';
+        db.pesticides.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = `pest-${p.id}`;
+            opt.textContent = p.name;
+            pestGroup.appendChild(opt);
+        });
+        entitySelect.appendChild(pestGroup);
+        
+        const plotGroup = document.createElement('optgroup');
+        plotGroup.label = currentLanguage === 'pt-BR' ? 'Filtrar por Talhão' : 'Filtrar por Lote';
+        db.plots.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = `plot-${p.id}`;
+            opt.textContent = p.name;
+            plotGroup.appendChild(opt);
+        });
+        entitySelect.appendChild(plotGroup);
+        
+    } else if (module === 'combustivel') {
+        const machGroup = document.createElement('optgroup');
+        machGroup.label = currentLanguage === 'pt-BR' ? 'Veículos e Frota' : 'Vehículos y Flota';
+        db.machinery.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = `mach-${m.id}`;
+            opt.textContent = `${m.name} (${m.type})`;
+            machGroup.appendChild(opt);
+        });
+        entitySelect.appendChild(machGroup);
+        
+    } else if (module === 'producao') {
+        const safraGroup = document.createElement('optgroup');
+        safraGroup.label = currentLanguage === 'pt-BR' ? 'Safras' : 'Zafras';
+        db.safras.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = `safra-${s.id}`;
+            opt.textContent = s.name;
+            safraGroup.appendChild(opt);
+        });
+        entitySelect.appendChild(safraGroup);
+        
+        const plotGroup = document.createElement('optgroup');
+        plotGroup.label = currentLanguage === 'pt-BR' ? 'Filtrar por Talhão' : 'Filtrar por Lote';
+        db.plots.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = `plot-${p.id}`;
+            opt.textContent = p.name;
+            plotGroup.appendChild(opt);
+        });
+        entitySelect.appendChild(plotGroup);
+        
+    } else if (module === 'cadastros') {
+        const catGroup = document.createElement('optgroup');
+        catGroup.label = currentLanguage === 'pt-BR' ? 'Tabelas do Sistema' : 'Tablas del Sistema';
+        
+        const list = [
+            { val: 'plots', name: currentLanguage === 'pt-BR' ? 'Talhões / Áreas' : 'Lotes / Chacras' },
+            { val: 'machinery', name: currentLanguage === 'pt-BR' ? 'Máquinas / Frota' : 'Maquinarias / Flota' },
+            { val: 'staff', name: currentLanguage === 'pt-BR' ? 'Colaboradores / Equipe' : 'Personal / Diaristas' }
+        ];
+        list.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.val;
+            opt.textContent = item.name;
+            catGroup.appendChild(opt);
+        });
+        entitySelect.appendChild(catGroup);
+    }
+}
+
+function setReportQuickRange(rangeType) {
+    const startInput = document.getElementById('report-start-date');
+    const endInput = document.getElementById('report-end-date');
+    if (!startInput || !endInput) return;
+    
+    const now = new Date('2026-05-24');
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    
+    if (rangeType === 'este_mes') {
+        startInput.value = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
+        const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+        endInput.value = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    } else if (rangeType === 'mes_passado') {
+        let prevMonth = currentMonth - 1;
+        let prevYear = currentYear;
+        if (prevMonth < 0) {
+            prevMonth = 11;
+            prevYear--;
+        }
+        startInput.value = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-01`;
+        const lastDay = new Date(prevYear, prevMonth + 1, 0).getDate();
+        endInput.value = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    } else if (rangeType === '3_meses') {
+        const threeMonthsAgo = new Date('2026-05-24');
+        threeMonthsAgo.setDate(threeMonthsAgo.getDate() - 90);
+        startInput.value = threeMonthsAgo.toISOString().split('T')[0];
+        endInput.value = now.toISOString().split('T')[0];
+    } else if (rangeType === 'ano_atual') {
+        startInput.value = `${currentYear}-01-01`;
+        endInput.value = `${currentYear}-12-31`;
+    } else if (rangeType === 'tudo') {
+        startInput.value = '';
+        endInput.value = '';
+    }
+    
+    triggerManualReportGeneration();
+}
+
+function triggerManualReportGeneration() {
+    const moduleSelect = document.getElementById('report-module-select');
+    const startInput = document.getElementById('report-start-date');
+    const endInput = document.getElementById('report-end-date');
+    const entitySelect = document.getElementById('report-entity-select');
+    
+    if (!moduleSelect || !entitySelect) return;
+    
+    const module = moduleSelect.value;
+    const start = startInput ? startInput.value : '';
+    const end = endInput ? endInput.value : '';
+    const entity = entitySelect.value;
+    
+    generateReport(module, start, end, entity);
+}
+
+function generateReport(module, startDate, endDate, specificEntity) {
+    const isPt = currentLanguage === 'pt-BR';
+    const timestampEl = document.getElementById('report-generated-timestamp');
+    if (timestampEl) {
+        const dateStr = new Date('2026-05-24T15:00:00').toLocaleString(isPt ? 'pt-BR' : 'es-PY');
+        timestampEl.textContent = `${isPt ? 'Gerado em' : 'Generado en'}: ${dateStr}`;
+    }
+    
+    const subtitleEl = document.getElementById('report-rendered-subtitle');
+    let periodStr = (startDate || endDate) 
+        ? `${startDate || '...'} ${isPt ? 'até' : 'hasta'} ${endDate || '...'}`
+        : (isPt ? 'Todo o histórico' : 'Todo el historial');
+        
+    let entityLabel = isPt ? 'Filtro: Todos' : 'Filtro: Todos';
+    const entitySelect = document.getElementById('report-entity-select');
+    if (entitySelect && entitySelect.selectedIndex >= 0) {
+        entityLabel = `${isPt ? 'Filtro' : 'Filtro'}: ${entitySelect.options[entitySelect.selectedIndex].text}`;
+    }
+    if (subtitleEl) {
+        subtitleEl.textContent = `${isPt ? 'Período' : 'Período'}: ${periodStr} | ${entityLabel}`;
+    }
+
+    const titleEl = document.getElementById('report-rendered-title');
+    const headerIcon = document.getElementById('report-header-icon');
+    
+    const kpiGrid = document.getElementById('report-kpi-grid');
+    const tableHeader = document.getElementById('report-table-header');
+    const tableBody = document.getElementById('report-table-body');
+    const chartContainer = document.getElementById('report-chart-container');
+    const emptyMsg = document.getElementById('report-empty-message');
+    
+    kpiGrid.innerHTML = '';
+    tableHeader.innerHTML = '';
+    tableBody.innerHTML = '';
+    chartContainer.innerHTML = '';
+    emptyMsg.classList.add('hidden');
+    
+    if (module === 'financeiro') {
+        if (titleEl) titleEl.textContent = isPt ? 'Relatório Financeiro (Caixa)' : 'Reporte Financiero (Caja)';
+        if (headerIcon) headerIcon.textContent = 'payments';
+        
+        let list = db.transactions.filter(t => {
+            if (startDate && t.date < startDate) return false;
+            if (endDate && t.date > endDate) return false;
+            
+            if (specificEntity && specificEntity !== 'all') {
+                if (specificEntity.startsWith('cat-')) {
+                    const parts = specificEntity.split('-'); 
+                    const type = parts[1]; 
+                    const cat = parts[2]; 
+                    if (t.type !== type || t.category !== cat) return false;
+                } else if (specificEntity.startsWith('plot-')) {
+                    const plotId = specificEntity.substring(5);
+                    if (t.plot_id !== plotId) return false;
+                }
+            }
+            return true;
+        });
+        
+        list.sort((a, b) => b.date.localeCompare(a.date));
+        
+        let totalRevenue = 0;
+        let totalExpense = 0;
+        list.forEach(t => {
+            const valBrl = convertValue(t.amount, t.currency, 'BRL');
+            if (t.type === 'receita') {
+                totalRevenue += valBrl;
+            } else {
+                totalExpense += valBrl;
+            }
+        });
+        const netBalance = totalRevenue - totalExpense;
+        
+        kpiGrid.innerHTML = `
+            <div class="bg-primary-container/20 border border-primary-container/40 p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_total_revenue}</span>
+                <span class="font-data-numeral text-lg font-bold text-[#10b981] block">${formatCurrency(totalRevenue, 'BRL')}</span>
+            </div>
+            <div class="bg-error-container/20 border border-error-container/40 p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_total_expense}</span>
+                <span class="font-data-numeral text-lg font-bold text-error block">${formatCurrency(totalExpense, 'BRL')}</span>
+            </div>
+            <div class="bg-surface-container-high border border-outline-variant p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_net_balance}</span>
+                <span class="font-data-numeral text-lg font-bold block ${netBalance >= 0 ? 'text-[#10b981]' : 'text-error'}">${formatCurrency(netBalance, 'BRL')}</span>
+            </div>
+        `;
+        
+        tableHeader.innerHTML = `
+            <th class="p-3">${isPt ? 'Data' : 'Fecha'}</th>
+            <th class="p-3">${isPt ? 'Descrição' : 'Descripción'}</th>
+            <th class="p-3">${isPt ? 'Categoria' : 'Categoría'}</th>
+            <th class="p-3">${isPt ? 'Tipo' : 'Tipo'}</th>
+            <th class="p-3 text-right">${isPt ? 'Valor Original' : 'Monto Original'}</th>
+            <th class="p-3 text-right">${isPt ? 'Equiv. BRL' : 'Equiv. BRL'}</th>
+        `;
+        
+        if (list.length === 0) {
+            emptyMsg.classList.remove('hidden');
+        } else {
+            list.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-surface-container-high/40 transition-colors';
+                const valBrl = convertValue(t.amount, t.currency, 'BRL');
+                
+                const typeText = t.type === 'receita' 
+                    ? `<span class="bg-[#10b981]/15 text-[#047857] px-2 py-0.5 rounded text-[10px] font-bold uppercase">${isPt ? 'Entrada' : 'Ingreso'}</span>`
+                    : `<span class="bg-error/15 text-error px-2 py-0.5 rounded text-[10px] font-bold uppercase">${isPt ? 'Saída' : 'Egreso'}</span>`;
+                    
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold font-data-numeral">${t.date}</td>
+                    <td class="p-3">${escapeHTML(t.description)}</td>
+                    <td class="p-3 font-bold text-on-surface-variant">${t.category}</td>
+                    <td class="p-3">${typeText}</td>
+                    <td class="p-3 text-right font-semibold">${formatCurrency(t.amount, t.currency)}</td>
+                    <td class="p-3 text-right font-bold text-primary">${formatCurrency(valBrl, 'BRL')}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            
+            const cats = {};
+            list.forEach(t => {
+                const valBrl = convertValue(t.amount, t.currency, 'BRL');
+                const key = `${t.type === 'receita' ? '+' : '-'}${t.category}`;
+                cats[key] = (cats[key] || 0) + valBrl;
+            });
+            
+            const chartData = Object.keys(cats).map(k => {
+                const type = k.startsWith('+') ? 'receita' : 'gasto';
+                const label = k.substring(1);
+                return { label, value: cats[k], type };
+            });
+            
+            chartContainer.innerHTML = drawSvgBarChart(chartData);
+        }
+        
+    } else if (module === 'insumos') {
+        if (titleEl) titleEl.textContent = isPt ? 'Relatório de Defensivos & Aplicações' : 'Reporte de Defensivos y Aplicaciones';
+        if (headerIcon) headerIcon.textContent = 'science';
+        
+        let list = db.applications.filter(a => {
+            if (startDate && a.date < startDate) return false;
+            if (endDate && a.date > endDate) return false;
+            
+            if (specificEntity && specificEntity !== 'all') {
+                if (specificEntity.startsWith('pest-')) {
+                    const pestId = specificEntity.substring(5);
+                    if (a.pesticide_id !== pestId) return false;
+                } else if (specificEntity.startsWith('plot-')) {
+                    const plotId = specificEntity.substring(5);
+                    if (a.plot_id !== plotId) return false;
+                }
+            }
+            return true;
+        });
+        
+        list.sort((a, b) => b.date.localeCompare(a.date));
+        
+        let totalApplied = 0;
+        list.forEach(a => totalApplied += a.amount_applied);
+        const avgApplied = list.length > 0 ? (totalApplied / list.length) : 0;
+        
+        kpiGrid.innerHTML = `
+            <div class="bg-primary-container/20 border border-primary-container/40 p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_total_applied}</span>
+                <span class="font-data-numeral text-lg font-bold text-primary block">${totalApplied.toFixed(1)} L</span>
+            </div>
+            <div class="bg-surface-container-high border border-outline-variant p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_avg_applied}</span>
+                <span class="font-data-numeral text-lg font-bold block">${avgApplied.toFixed(1)} L</span>
+            </div>
+            <div class="bg-surface-container-high border border-outline-variant p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_count}</span>
+                <span class="font-data-numeral text-lg font-bold block text-primary">${list.length}</span>
+            </div>
+        `;
+        
+        tableHeader.innerHTML = `
+            <th class="p-3">${isPt ? 'Data' : 'Fecha'}</th>
+            <th class="p-3">${isPt ? 'Talhão' : 'Lote'}</th>
+            <th class="p-3">${isPt ? 'Defensivo Utilizado' : 'Defensivo Aplicado'}</th>
+            <th class="p-3 text-right">${isPt ? 'Volume Aplicado (L)' : 'Volumen Aplicado (L)'}</th>
+            <th class="p-3">${isPt ? 'Clima de Aplicação' : 'Clima de Aplicación'}</th>
+        `;
+        
+        if (list.length === 0) {
+            emptyMsg.classList.remove('hidden');
+        } else {
+            list.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-surface-container-high/40 transition-colors';
+                const plot = db.plots.find(p => p.id === a.plot_id);
+                const pest = db.pesticides.find(p => p.id === a.pesticide_id);
+                
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold font-data-numeral">${a.date}</td>
+                    <td class="p-3 font-bold">${plot ? plot.name : (a.plot_id || '-')}</td>
+                    <td class="p-3 font-bold text-primary">${pest ? pest.name : (a.pesticide_id || '-')}</td>
+                    <td class="p-3 text-right font-bold font-data-numeral text-[#10b981]">${a.amount_applied} L</td>
+                    <td class="p-3 opacity-80">${a.weather_condition || '-'}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            
+            const pestsMap = {};
+            list.forEach(a => {
+                const pest = db.pesticides.find(p => p.id === a.pesticide_id);
+                const name = pest ? pest.name : a.pesticide_id;
+                pestsMap[name] = (pestsMap[name] || 0) + a.amount_applied;
+            });
+            
+            const chartData = Object.keys(pestsMap).map(k => ({ label: k, value: pestsMap[k] }));
+            chartContainer.innerHTML = drawSvgBarChart(chartData, 'tertiary');
+        }
+        
+    } else if (module === 'combustivel') {
+        if (titleEl) titleEl.textContent = isPt ? 'Relatório de Consumo de Combustível' : 'Reporte de Consumo de Gasoil';
+        if (headerIcon) headerIcon.textContent = 'gas_meter';
+        
+        let list = db.fuelLogs.filter(f => {
+            if (startDate && f.date < startDate) return false;
+            if (endDate && f.date > endDate) return false;
+            
+            if (specificEntity && specificEntity !== 'all') {
+                if (specificEntity.startsWith('mach-')) {
+                    const machId = specificEntity.substring(5);
+                    const mach = db.machinery.find(m => m.id === machId);
+                    
+                    if (f.mach_id) {
+                        if (f.mach_id !== machId) return false;
+                    } else if (mach) {
+                        if (!f.desc.toLowerCase().includes(mach.name.toLowerCase())) return false;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        });
+        
+        list.sort((a, b) => b.date.localeCompare(a.date));
+        
+        let totalLiters = 0;
+        let totalCostBrl = 0;
+        list.forEach(f => {
+            totalLiters += f.amount_liters;
+            totalCostBrl += convertValue(f.cost_value, f.currency, 'BRL');
+        });
+        const avgRefuels = list.length > 0 ? (totalLiters / list.length) : 0;
+        
+        kpiGrid.innerHTML = `
+            <div class="bg-primary-container/20 border border-primary-container/40 p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_total_liters}</span>
+                <span class="font-data-numeral text-lg font-bold text-primary block">${totalLiters} L</span>
+            </div>
+            <div class="bg-surface-container-high border border-outline-variant p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_total_cost}</span>
+                <span class="font-data-numeral text-lg font-bold block text-error">${formatCurrency(totalCostBrl, 'BRL')}</span>
+            </div>
+            <div class="bg-surface-container-high border border-outline-variant p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_avg_consumption}</span>
+                <span class="font-data-numeral text-lg font-bold block text-primary">${avgRefuels.toFixed(1)} L</span>
+            </div>
+        `;
+        
+        tableHeader.innerHTML = `
+            <th class="p-3">${isPt ? 'Data' : 'Fecha'}</th>
+            <th class="p-3">${isPt ? 'Descrição / Destino' : 'Descripción / Destino'}</th>
+            <th class="p-3 text-right">${isPt ? 'Quantidade (L)' : 'Cantidad (L)'}</th>
+            <th class="p-3 text-right">${isPt ? 'Custo Original' : 'Costo Original'}</th>
+            <th class="p-3 text-right">${isPt ? 'Equiv. BRL' : 'Equiv. BRL'}</th>
+        `;
+        
+        if (list.length === 0) {
+            emptyMsg.classList.remove('hidden');
+        } else {
+            list.forEach(f => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-surface-container-high/40 transition-colors';
+                const costBrl = convertValue(f.cost_value, f.currency, 'BRL');
+                
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold font-data-numeral">${f.date}</td>
+                    <td class="p-3 font-bold">${escapeHTML(f.desc)}</td>
+                    <td class="p-3 text-right font-bold text-[#10b981] font-data-numeral">${f.amount_liters} L</td>
+                    <td class="p-3 text-right">${f.cost_value > 0 ? formatCurrency(f.cost_value, f.currency) : '-'}</td>
+                    <td class="p-3 text-right font-bold text-error">${f.cost_value > 0 ? formatCurrency(costBrl, 'BRL') : '-'}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            
+            const daysMap = {};
+            list.slice(0, 10).forEach(f => {
+                daysMap[f.date] = (daysMap[f.date] || 0) + f.amount_liters;
+            });
+            const chartData = Object.keys(daysMap).map(k => ({ label: k, value: daysMap[k] }));
+            chartData.reverse(); 
+            chartContainer.innerHTML = drawSvgBarChart(chartData);
+        }
+        
+    } else if (module === 'producao') {
+        if (titleEl) titleEl.textContent = isPt ? 'Relatório de Produção e Colheita' : 'Reporte de Producción y Cosecha';
+        if (headerIcon) headerIcon.textContent = 'grain';
+        
+        let list = db.seedsGrains.filter(sg => {
+            if (startDate && sg.date < startDate) return false;
+            if (endDate && sg.date > endDate) return false;
+            
+            if (specificEntity && specificEntity !== 'all') {
+                if (specificEntity.startsWith('safra-')) {
+                    const safraId = specificEntity.substring(6);
+                    if (sg.safra_id !== safraId) return false;
+                } else if (specificEntity.startsWith('plot-')) {
+                    const plotId = specificEntity.substring(5);
+                    const plot = db.plots.find(p => p.id === plotId);
+                    if (plot && !sg.name.toLowerCase().includes(plot.name.toLowerCase())) return false;
+                }
+            }
+            return true;
+        });
+        
+        list.sort((a, b) => b.date.localeCompare(a.date));
+        
+        let totalBags = 0;
+        let totalValueBrl = 0;
+        list.forEach(sg => {
+            if (sg.unit === 'Sacas' || sg.unit === 'Sacos') {
+                totalBags += sg.quantity;
+            }
+            totalValueBrl += convertValue(sg.cost, sg.currency, 'BRL');
+        });
+        
+        kpiGrid.innerHTML = `
+            <div class="bg-primary-container/20 border border-primary-container/40 p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_total_bags}</span>
+                <span class="font-data-numeral text-lg font-bold text-primary block">${totalBags} sacas</span>
+            </div>
+            <div class="bg-surface-container-high border border-outline-variant p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_total_weight}</span>
+                <span class="font-data-numeral text-lg font-bold block text-[#10b981]">${(totalBags * 60).toLocaleString()} Kg</span>
+            </div>
+            <div class="bg-surface-container-high border border-outline-variant p-4 rounded-xl shadow-sm">
+                <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${isPt ? 'Valoração Estimada' : 'Valor Estimado'}</span>
+                <span class="font-data-numeral text-lg font-bold block text-primary">${formatCurrency(totalValueBrl, 'BRL')}</span>
+            </div>
+        `;
+        
+        tableHeader.innerHTML = `
+            <th class="p-3">${isPt ? 'Data' : 'Fecha'}</th>
+            <th class="p-3">${isPt ? 'Tipo de Registro' : 'Tipo de Registro'}</th>
+            <th class="p-3">${isPt ? 'Nome do Item / Variedade' : 'Nombre / Variedad'}</th>
+            <th class="p-3 text-right">${isPt ? 'Quantidade' : 'Cantidad'}</th>
+            <th class="p-3 text-right">${isPt ? 'Valor Estimado' : 'Valor Estimado'}</th>
+        `;
+        
+        if (list.length === 0) {
+            emptyMsg.classList.remove('hidden');
+        } else {
+            list.forEach(sg => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-surface-container-high/40 transition-colors';
+                const costBrl = convertValue(sg.cost, sg.currency, 'BRL');
+                
+                const typeText = sg.type.includes('Colhido') || sg.type.includes('Cosechado')
+                    ? `<span class="bg-[#10b981]/15 text-[#047857] px-2 py-0.5 rounded text-[10px] font-bold uppercase">${isPt ? 'Colheita' : 'Cosecha'}</span>`
+                    : `<span class="bg-primary/15 text-primary px-2 py-0.5 rounded text-[10px] font-bold uppercase">${isPt ? 'Compra / Tratamento' : 'Semilla'}</span>`;
+                    
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold font-data-numeral">${sg.date}</td>
+                    <td class="p-3">${typeText}</td>
+                    <td class="p-3 font-bold">${escapeHTML(sg.name)}</td>
+                    <td class="p-3 text-right font-bold text-primary font-data-numeral">${sg.quantity} ${sg.unit}</td>
+                    <td class="p-3 text-right font-bold text-[#10b981]">${formatCurrency(costBrl, 'BRL')}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            
+            const namesMap = {};
+            list.forEach(sg => {
+                namesMap[sg.name] = (namesMap[sg.name] || 0) + sg.quantity;
+            });
+            const chartData = Object.keys(namesMap).map(k => ({ label: k, value: namesMap[k] }));
+            chartContainer.innerHTML = drawSvgBarChart(chartData);
+        }
+        
+    } else if (module === 'cadastros') {
+        if (titleEl) titleEl.textContent = isPt ? 'Relatório de Ativos e Cadastros' : 'Reporte de Activos y Registros';
+        if (headerIcon) headerIcon.textContent = 'inventory';
+        
+        const type = (specificEntity && specificEntity !== 'all') ? specificEntity : 'plots';
+        
+        if (type === 'plots') {
+            kpiGrid.innerHTML = `
+                <div class="bg-primary-container/20 border border-primary-container/40 p-4 rounded-xl shadow-sm col-span-3">
+                    <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_active_plots}</span>
+                    <span class="font-data-numeral text-lg font-bold text-primary block">${db.plots.length} talhões cadastrados</span>
+                </div>
+            `;
+            
+            tableHeader.innerHTML = `
+                <th class="p-3">${isPt ? 'ID' : 'ID'}</th>
+                <th class="p-3">${isPt ? 'Nome do Talhão' : 'Nombre del Lote'}</th>
+                <th class="p-3 text-right">${isPt ? 'Tamanho (Hectares)' : 'Tamaño (Hectáreas)'}</th>
+                <th class="p-3 text-right">${isPt ? 'Tamanho (Alqueires)' : 'Tamaño (Alqueires)'}</th>
+                <th class="p-3">${isPt ? 'Cultura' : 'Cultura'}</th>
+                <th class="p-3">${isPt ? 'Status' : 'Estado'}</th>
+            `;
+            
+            if (db.plots.length === 0) {
+                emptyMsg.classList.remove('hidden');
+            } else {
+                db.plots.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-surface-container-high/40 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 text-on-surface-variant font-data-numeral">${p.id}</td>
+                        <td class="p-3 font-bold text-primary">${escapeHTML(p.name)}</td>
+                        <td class="p-3 text-right font-semibold font-data-numeral">${p.size_hectares} ha</td>
+                        <td class="p-3 text-right font-semibold font-data-numeral">${p.size_alqueires} alq</td>
+                        <td class="p-3 font-bold">${p.crop_type}</td>
+                        <td class="p-3"><span class="bg-[#10b981]/15 text-[#047857] px-2 py-0.5 rounded text-[10px] font-bold uppercase">${p.status || 'Ativo'}</span></td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+                
+                const plotData = db.plots.map(p => ({ label: p.name, value: p.size_hectares }));
+                chartContainer.innerHTML = drawSvgBarChart(plotData);
+            }
+            
+        } else if (type === 'machinery') {
+            kpiGrid.innerHTML = `
+                <div class="bg-primary-container/20 border border-primary-container/40 p-4 rounded-xl shadow-sm col-span-3">
+                    <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_active_machinery}</span>
+                    <span class="font-data-numeral text-lg font-bold text-primary block">${db.machinery.length} veículos na frota</span>
+                </div>
+            `;
+            
+            tableHeader.innerHTML = `
+                <th class="p-3">${isPt ? 'Modelo' : 'Modelo'}</th>
+                <th class="p-3">${isPt ? 'Tipo de Máquina' : 'Tipo de Máquina'}</th>
+                <th class="p-3 text-right">${isPt ? 'Nível Combustível' : 'Combustible'}</th>
+                <th class="p-3">${isPt ? 'Status' : 'Estado'}</th>
+                <th class="p-3">${isPt ? 'Última Ação' : 'Última Acción'}</th>
+            `;
+            
+            if (db.machinery.length === 0) {
+                emptyMsg.classList.remove('hidden');
+            } else {
+                db.machinery.forEach(m => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-surface-container-high/40 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold text-primary">${escapeHTML(m.name)}</td>
+                        <td class="p-3 font-semibold">${m.type}</td>
+                        <td class="p-3 text-right font-bold font-data-numeral ${m.fuel_level_percent < 20 ? 'text-error' : 'text-[#10b981]'}">${m.fuel_level_percent}%</td>
+                        <td class="p-3"><span class="bg-[#10b981]/15 text-[#047857] px-2 py-0.5 rounded text-[10px] font-bold uppercase">${m.status}</span></td>
+                        <td class="p-3 text-on-surface-variant">${escapeHTML(m.last_action)}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+                
+                const machData = db.machinery.map(m => ({ label: m.name, value: m.fuel_level_percent }));
+                chartContainer.innerHTML = drawSvgBarChart(machData, 'tertiary');
+            }
+            
+        } else if (type === 'staff') {
+            kpiGrid.innerHTML = `
+                <div class="bg-primary-container/20 border border-primary-container/40 p-4 rounded-xl shadow-sm col-span-3">
+                    <span class="text-[10px] text-on-surface-variant font-bold block uppercase">${translations[currentLanguage].rep_active_staff}</span>
+                    <span class="font-data-numeral text-lg font-bold text-primary block">${db.staff.length} colaboradores</span>
+                </div>
+            `;
+            
+            tableHeader.innerHTML = `
+                <th class="p-3">${isPt ? 'Nome' : 'Nombre'}</th>
+                <th class="p-3">${isPt ? 'Função' : 'Función'}</th>
+                <th class="p-3">${isPt ? 'Vínculo' : 'Vínculo'}</th>
+                <th class="p-3 text-right">${isPt ? 'Salário / Diária' : 'Salario / Diaria'}</th>
+            `;
+            
+            if (db.staff.length === 0) {
+                emptyMsg.classList.remove('hidden');
+            } else {
+                db.staff.forEach(s => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-surface-container-high/40 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold text-primary">${escapeHTML(s.name)}</td>
+                        <td class="p-3 font-semibold">${s.role}</td>
+                        <td class="p-3"><span class="bg-primary/10 text-primary px-2 py-0.5 rounded text-[10px] font-semibold">${s.type}</span></td>
+                        <td class="p-3 text-right font-bold text-on-surface font-data-numeral">${formatCurrency(s.wage_rate, s.currency)}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+                
+                const staffData = db.staff.map(s => ({ label: s.name, value: convertValue(s.wage_rate, s.currency, 'BRL') }));
+                chartContainer.innerHTML = drawSvgBarChart(staffData);
+            }
+        }
+    }
+}
+
+function printActiveReport() {
+    window.print();
+}
+
+function drawSvgBarChart(dataPoints, colorTheme = 'primary') {
+    if (!dataPoints || dataPoints.length === 0) {
+        return `<div class="text-xs text-on-surface-variant/60 font-semibold pt-4">${currentLanguage === 'pt-BR' ? 'Sem dados para exibição do gráfico' : 'Sin datos para mostrar el gráfico'}</div>`;
+    }
+    
+    const maxVal = Math.max(...dataPoints.map(d => d.value), 1);
+    const width = 600;
+    const height = 160;
+    const paddingLeft = 60;
+    const paddingRight = 20;
+    const paddingTop = 20;
+    const paddingBottom = 30;
+    
+    const chartWidth = width - paddingLeft - paddingRight;
+    const chartHeight = height - paddingTop - paddingBottom;
+    const barWidth = Math.max(8, Math.min(45, (chartWidth / dataPoints.length) * 0.6));
+    const gap = (chartWidth / dataPoints.length) - barWidth;
+    
+    let svg = `<svg viewBox="0 0 ${width} ${height}" class="w-full h-full select-none" style="background: transparent;">`;
+    
+    for (let i = 0; i <= 4; i++) {
+        const y = paddingTop + chartHeight - (chartHeight * (i / 4));
+        const val = (maxVal * (i / 4));
+        svg += `
+            <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="currentColor" stroke-dasharray="3,3" opacity="0.15" />
+            <text x="${paddingLeft - 8}" y="${y + 3}" class="fill-on-surface-variant opacity-75 font-semibold" text-anchor="end" style="font-size: 8px;">${formatChartVal(val)}</text>
+        `;
+    }
+    
+    dataPoints.forEach((d, idx) => {
+        const x = paddingLeft + (idx * (barWidth + gap)) + (gap / 2);
+        const pct = d.value / maxVal;
+        const barHeight = chartHeight * pct;
+        const y = paddingTop + chartHeight - barHeight;
+        
+        let color = 'var(--color-primary)';
+        if (d.type === 'gasto') color = 'var(--color-error)';
+        else if (d.type === 'receita') color = '#10b981'; 
+        else if (colorTheme === 'error') color = 'var(--color-error)';
+        else if (colorTheme === 'tertiary') color = 'var(--color-tertiary)';
+        
+        svg += `
+            <g class="group cursor-pointer">
+                <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${color}" rx="3" class="transition-all duration-300 hover:opacity-80">
+                    <title>${d.label}: ${d.value}</title>
+                </rect>
+                <text x="${x + barWidth / 2}" y="${y - 4}" class="fill-on-surface font-bold text-center" text-anchor="middle" style="font-size: 7px;">${formatChartVal(d.value)}</text>
+                <text x="${x + barWidth / 2}" y="${paddingTop + chartHeight + 14}" class="fill-on-surface-variant font-semibold text-center" text-anchor="middle" style="font-size: 8px;">${truncateText(d.label, 12)}</text>
+            </g>
+        `;
+    });
+    
+    svg += `<line x1="${paddingLeft}" y1="${paddingTop + chartHeight}" x2="${width - paddingRight}" y2="${paddingTop + chartHeight}" stroke="currentColor" stroke-width="1.5" opacity="0.3" />`;
+    svg += `</svg>`;
+    return svg;
+}
+
+function formatChartVal(val) {
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
+    if (Number.isInteger(val)) return val;
+    return val.toFixed(1);
+}
+
+function truncateText(str, maxLen) {
+    if (!str) return '';
+    return str.length > maxLen ? str.substring(0, maxLen - 1) + '..' : str;
+}
+
+let reportVoiceListening = false;
+let reportRecognitionInstance = null;
+
+function toggleReportVoiceInput() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        showToast("Reconhecimento de voz não suportado neste navegador!", true);
+        return;
+    }
+    
+    const wave = document.getElementById('report-voice-wave');
+    const txt = document.getElementById('report-voice-txt');
+    const mic = document.getElementById('report-mic-btn');
+    
+    if (reportVoiceListening) {
+        if (reportRecognitionInstance) {
+            reportRecognitionInstance.stop();
+        }
+        reportVoiceListening = false;
+        if (wave) wave.classList.add('hidden');
+        if (mic) mic.classList.remove('text-primary');
+        return;
+    }
+    
+    reportRecognitionInstance = new SpeechRecognition();
+    reportRecognitionInstance.lang = currentLanguage;
+    reportRecognitionInstance.continuous = false;
+    reportRecognitionInstance.interimResults = false;
+    
+    reportRecognitionInstance.onstart = () => {
+        reportVoiceListening = true;
+        if (wave) wave.classList.remove('hidden');
+        if (mic) mic.classList.add('text-primary');
+        if (txt) txt.textContent = currentLanguage === 'pt-BR' 
+            ? 'Ouvindo comando de voz para relatórios...' 
+            : 'Escuchando comando de voz para reportes...';
+    };
+    
+    reportRecognitionInstance.onerror = (e) => {
+        console.error("Report Speech Error:", e);
+        reportVoiceListening = false;
+        if (wave) wave.classList.add('hidden');
+        if (mic) mic.classList.remove('text-primary');
+        showToast("Erro na captação da voz", true);
+    };
+    
+    reportRecognitionInstance.onend = () => {
+        reportVoiceListening = false;
+        if (wave) wave.classList.add('hidden');
+        if (mic) mic.classList.remove('text-primary');
+    };
+    
+    reportRecognitionInstance.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        const input = document.getElementById('report-ai-input');
+        if (input) {
+            input.value = text;
+            executeReportAICommand();
+        }
+    };
+    
+    reportRecognitionInstance.start();
+}
+
+function handleReportAIKey(e) {
+    if (e.key === 'Enter') {
+        executeReportAICommand();
+    }
+}
+
+function executeReportAICommand() {
+    const input = document.getElementById('report-ai-input');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    
+    const isPt = currentLanguage === 'pt-BR';
+    const parsed = parseAndApplyReportFilters(text);
+    
+    if (parsed) {
+        showToast(isPt ? 'Relatório gerado por comando IA!' : '¡Reporte generado por comando IA!');
+        input.value = '';
+    } else {
+        showToast(isPt ? 'Não entendi o comando do relatório.' : 'No entendí el comando del reporte.', true);
+    }
+}
+
+function parseAndApplyReportFilters(text) {
+    const cleanText = text.toLowerCase();
+    
+    let matchedModule = '';
+    let matchedEntity = 'all';
+    let matchedStart = '';
+    let matchedEnd = '';
+    
+    if (
+        cleanText.includes('caixa') || cleanText.includes('financeiro') || cleanText.includes('finança') || 
+        cleanText.includes('financa') || cleanText.includes('gasto') || cleanText.includes('receita') || 
+        cleanText.includes('pagamento') || cleanText.includes('compra') || cleanText.includes('venda') || 
+        cleanText.includes('ingreso') || cleanText.includes('egreso') || cleanText.includes('custo') || cleanText.includes('lucro')
+    ) {
+        matchedModule = 'financeiro';
+        
+        if (cleanText.includes('combustivel') || cleanText.includes('combustível') || cleanText.includes('diesel') || cleanText.includes('gasoil')) {
+            matchedEntity = 'cat-gasto-Combustível';
+        } else if (cleanText.includes('defensivo') || cleanText.includes('veneno') || cleanText.includes('insumo')) {
+            matchedEntity = 'cat-gasto-Defensivos';
+        } else if (cleanText.includes('mão de obra') || cleanText.includes('mao de obra') || cleanText.includes('salário') || cleanText.includes('salario') || cleanText.includes('pagamento') || cleanText.includes('diária') || cleanText.includes('diaria') || cleanText.includes('jornal') || cleanText.includes('colaborador') || cleanText.includes('funcionario') || cleanText.includes('funcionário')) {
+            matchedEntity = 'cat-gasto-Mão de Obra';
+        } else if (cleanText.includes('colheita') || cleanText.includes('venda de grãos') || cleanText.includes('venda de graos') || cleanText.includes('venta') || cleanText.includes('soja') || cleanText.includes('milho')) {
+            matchedEntity = 'cat-receita-Colheita';
+        }
+    } else if (
+        cleanText.includes('defensivo') || cleanText.includes('veneno') || cleanText.includes('aplicação') || 
+        cleanText.includes('aplicacao') || cleanText.includes('pulverização') || cleanText.includes('pulverizacao') || 
+        cleanText.includes('insumo') || cleanText.includes('inseticida') || cleanText.includes('fungicida') || 
+        cleanText.includes('herbicida') || cleanText.includes('aplica') || cleanText.includes('rociar') || cleanText.includes('pulveriza')
+    ) {
+        matchedModule = 'insumos';
+    } else if (
+        cleanText.includes('diesel') || cleanText.includes('combustível') || cleanText.includes('combustivel') || 
+        cleanText.includes('abastecer') || cleanText.includes('abastecimento') || cleanText.includes('gasoil')
+    ) {
+        matchedModule = 'combustivel';
+    } else if (
+        cleanText.includes('colheita') || cleanText.includes('colher') || cleanText.includes('safra') || 
+        cleanText.includes('grão') || cleanText.includes('grãos') || cleanText.includes('semente') || 
+        cleanText.includes('sementes') || cleanText.includes('produção') || cleanText.includes('producao') ||
+        cleanText.includes('cosecha') || cleanText.includes('cosechar') || cleanText.includes('granos') || 
+        cleanText.includes('semilla') || cleanText.includes('semillas')
+    ) {
+        matchedModule = 'producao';
+    } else if (
+        cleanText.includes('cadastro') || cleanText.includes('ativos') || cleanText.includes('funcionários') || 
+        cleanText.includes('funcionarios') || cleanText.includes('maquinas') || cleanText.includes('máquinas') || 
+        cleanText.includes('talhões') || cleanText.includes('talhoes') || cleanText.includes('lotes') || 
+        cleanText.includes('chacras') || cleanText.includes('peão') || cleanText.includes('peon') || 
+        cleanText.includes('personal') || cleanText.includes('operário') || cleanText.includes('operario') ||
+        cleanText.includes('registros') || cleanText.includes('tabelas') || cleanText.includes('frota')
+    ) {
+        matchedModule = 'cadastros';
+        
+        if (cleanText.includes('talhão') || cleanText.includes('talhao') || cleanText.includes('lote') || cleanText.includes('chacra') || cleanText.includes('área') || cleanText.includes('area')) {
+            matchedEntity = 'plots';
+        } else if (cleanText.includes('maquina') || cleanText.includes('máquina') || cleanText.includes('trator') || cleanText.includes('frota')) {
+            matchedEntity = 'machinery';
+        } else if (cleanText.includes('colaborador') || cleanText.includes('funcionario') || cleanText.includes('funcionário') || cleanText.includes('staff') || cleanText.includes('equipe') || cleanText.includes('personal')) {
+            matchedEntity = 'staff';
+        }
+    }
+    
+    if (!matchedModule) {
+        if (cleanText.includes('imprimir') || cleanText.includes('print')) {
+            setTimeout(() => printActiveReport(), 500);
+            return true;
+        }
+        return false;
+    }
+    
+    const currentYear = 2026;
+    
+    const ptMonths = {
+        'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04', 'maio': '05', 'junho': '06',
+        'julho': '07', 'agosto': '08', 'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12'
+    };
+    const esMonths = {
+        'enero': '01', 'febrero': '02', 'marzo': '03', 'abril': '04', 'mayo': '05', 'junio': '06',
+        'julio': '07', 'agosto': '08', 'septiembre': '09', 'octubre': '10', 'noviembre': '11', 'diciembre': '12'
+    };
+    
+    let monthMatched = false;
+    Object.keys(ptMonths).forEach(m => {
+        if (cleanText.includes(m)) {
+            const mm = ptMonths[m];
+            matchedStart = `${currentYear}-${mm}-01`;
+            const lastDay = new Date(currentYear, parseInt(mm), 0).getDate();
+            matchedEnd = `${currentYear}-${mm}-${lastDay}`;
+            monthMatched = true;
+        }
+    });
+    
+    if (!monthMatched) {
+        Object.keys(esMonths).forEach(m => {
+            if (cleanText.includes(m)) {
+                const mm = esMonths[m];
+                matchedStart = `${currentYear}-${mm}-01`;
+                const lastDay = new Date(currentYear, parseInt(mm), 0).getDate();
+                matchedEnd = `${currentYear}-${mm}-${lastDay}`;
+                monthMatched = true;
+            }
+        });
+    }
+    
+    if (!monthMatched) {
+        if (cleanText.includes('este mês') || cleanText.includes('este mes') || cleanText.includes('mês atual') || cleanText.includes('mes actual')) {
+            matchedStart = `${currentYear}-05-01`;
+            matchedEnd = `${currentYear}-05-31`;
+        } else if (cleanText.includes('mês passado') || cleanText.includes('mes pasado')) {
+            matchedStart = `${currentYear}-04-01`;
+            matchedEnd = `${currentYear}-04-30`;
+        } else if (cleanText.includes('este ano') || cleanText.includes('este año') || cleanText.includes('ano atual') || cleanText.includes('año actual')) {
+            matchedStart = `${currentYear}-01-01`;
+            matchedEnd = `${currentYear}-12-31`;
+        } else if (cleanText.includes('hoje') || cleanText.includes('hoy')) {
+            matchedStart = `${currentYear}-05-24`;
+            matchedEnd = `${currentYear}-05-24`;
+        } else if (cleanText.includes('3 meses') || cleanText.includes('últimos 3 meses') || cleanText.includes('ultimos 3 meses')) {
+            matchedStart = `${currentYear}-02-23`; 
+            matchedEnd = `${currentYear}-05-24`;
+        }
+    }
+    
+    db.plots.forEach(p => {
+        if (cleanText.includes(p.name.toLowerCase())) {
+            matchedEntity = `plot-${p.id}`;
+        }
+    });
+    db.pesticides.forEach(p => {
+        if (cleanText.includes(p.name.toLowerCase())) {
+            matchedEntity = `pest-${p.id}`;
+        }
+    });
+    db.machinery.forEach(m => {
+        if (cleanText.includes(m.name.toLowerCase())) {
+            matchedEntity = `mach-${m.id}`;
+        }
+    });
+    db.staff.forEach(s => {
+        if (cleanText.includes(s.name.toLowerCase())) {
+            if (matchedModule === 'cadastros') {
+                matchedEntity = 'staff';
+            }
+        }
+    });
+    db.safras.forEach(s => {
+        if (cleanText.includes(s.name.toLowerCase())) {
+            matchedEntity = `safra-${s.id}`;
+        }
+    });
+    
+    const moduleSelect = document.getElementById('report-module-select');
+    const startInput = document.getElementById('report-start-date');
+    const endInput = document.getElementById('report-end-date');
+    
+    if (moduleSelect) {
+        moduleSelect.value = matchedModule;
+        
+        populateReportEntitySelect(matchedModule);
+        
+        const entitySelect = document.getElementById('report-entity-select');
+        if (entitySelect) {
+            let hasOpt = false;
+            for (let i = 0; i < entitySelect.options.length; i++) {
+                if (entitySelect.options[i].value === matchedEntity) {
+                    entitySelect.value = matchedEntity;
+                    hasOpt = true;
+                    break;
+                }
+            }
+            if (!hasOpt && matchedEntity !== 'all') {
+                entitySelect.value = matchedEntity;
+            }
+        }
+    }
+    
+    if (matchedStart && startInput) {
+        startInput.value = matchedStart;
+    }
+    if (matchedEnd && endInput) {
+        endInput.value = matchedEnd;
+    }
+    
+    triggerManualReportGeneration();
+    
+    if (cleanText.includes('imprimir') || cleanText.includes('print')) {
+        setTimeout(() => printActiveReport(), 1000);
+    }
+    
+    return true;
+}
 

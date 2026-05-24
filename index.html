@@ -124,6 +124,71 @@
     <!-- Custom Style Sheet -->
     <link href="style.css" rel="stylesheet"/>
     <link href="index.css" rel="stylesheet"/>
+    <style>
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            #desktop-sidebar, 
+            #mobile-tabbar, 
+            header.top-bar, 
+            #ai-chat-container, 
+            #demo-banner,
+            .no-print,
+            .btn,
+            button,
+            #report-filters-panel,
+            #report-ai-command-container {
+                display: none !important;
+            }
+            main.main-content {
+                margin: 0 !important;
+                padding: 0 !important;
+                margin-top: 0 !important;
+                width: 100% !important;
+            }
+            #report-print-area {
+                display: block !important;
+                width: 100% !important;
+                border: none !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .card, .summary-stat-box, .bg-surface-container-lowest, .bg-surface-container-low, .bg-surface-container-high {
+                background: white !important;
+                border: 1px solid #ddd !important;
+                color: black !important;
+                box-shadow: none !important;
+            }
+            #report-chart-box {
+                background: white !important;
+                border: 1px solid #ddd !important;
+                color: black !important;
+            }
+            #report-chart-container {
+                page-break-inside: avoid;
+            }
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+            th, td {
+                border: 1px solid #ccc !important;
+                padding: 6px 10px !important;
+                font-size: 10px !important;
+                color: black !important;
+            }
+            th {
+                background-color: #f3f4f6 !important;
+                font-weight: bold !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
 </head>
 <body class="bg-background text-on-background font-body-md overflow-x-hidden selection:bg-primary-fixed selection:text-on-primary-fixed">
 
@@ -264,6 +329,10 @@
                 <button class="nav-item flex items-center gap-3 w-full text-left px-3 py-1.5 rounded-full transition-all" onclick="switchTab('inventario')">
                     <span class="material-symbols-outlined">inventory_2</span>
                     <span class="font-label-md text-label-md" data-i18n="nav_inventario">Inventário</span>
+                </button>
+                <button class="nav-item flex items-center gap-3 w-full text-left px-3 py-1.5 rounded-full transition-all" onclick="switchTab('relatorios')">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <span class="font-label-md text-label-md" data-i18n="nav_relatorios">Relatórios & Análises</span>
                 </button>
             </nav>
             
@@ -1219,6 +1288,181 @@
                 </div>
             </section>
 
+            </section>
+
+            <!-- ================= VIEW 5: RELATÓRIOS & ANÁLISES ================= -->
+            <section id="view-relatorios" class="tab-view flex flex-col gap-6">
+                <!-- Page Title -->
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2 pb-4 border-b border-outline-variant/60">
+                    <div>
+                        <h2 class="font-display-lg text-primary text-2xl font-extrabold" data-i18n="relatorios_title">Relatórios & Análises</h2>
+                        <p class="font-body-md text-on-surface-variant text-sm" data-i18n="relatorios_subtitle">Gere relatórios de caixa, insumos, combustível, colheitas e cadastros.</p>
+                    </div>
+                </div>
+
+                <!-- AI COMMAND BOX -->
+                <div id="report-ai-command-container" class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-sm relative overflow-hidden group no-print">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-primary/5 blur-xl group-hover:scale-110 transition-transform duration-500"></div>
+                    <h3 class="font-headline-md text-xs font-bold text-on-surface mb-3 flex items-center gap-2 uppercase tracking-wide">
+                        <span class="material-symbols-outlined text-primary text-[20px]">smart_toy</span>
+                        <span data-i18n="lbl_generate_ai">Executar Comando IA</span>
+                    </h3>
+                    <div class="flex gap-2">
+                        <div class="relative flex-grow">
+                            <input type="text" id="report-ai-input" class="form-input w-full pr-12 font-body-md text-sm border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-xl" placeholder="Ex: 'Gere um relatório de caixa de maio'..." data-i18n-placeholder="ai_command_placeholder" onkeydown="handleReportAIKey(event)"/>
+                            <button id="report-mic-btn" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-all p-1 rounded-lg bg-surface-container/30 border border-outline-variant/30 hover:bg-primary/10 hover:border-primary flex items-center justify-center cursor-pointer" onclick="toggleReportVoiceInput()" title="Comando de voz">
+                                <span class="material-symbols-outlined text-[18px]">mic</span>
+                            </button>
+                        </div>
+                        <button class="btn btn-primary flex items-center gap-2 px-5 py-3 rounded-xl font-bold shrink-0" onclick="executeReportAICommand()">
+                            <span class="material-symbols-outlined text-[20px]">play_arrow</span>
+                            <span data-i18n="btn_execute">Executar</span>
+                        </button>
+                    </div>
+                    <!-- Listening Wave overlay -->
+                    <div id="report-voice-wave" class="hidden absolute inset-0 bg-primary-container/95 dark:bg-surface-dark/95 backdrop-blur-sm px-6 py-4 flex items-center justify-between z-10 transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary text-xl font-bold animate-pulse">mic</span>
+                            <span id="report-voice-txt" class="text-xs font-bold text-primary animate-pulse">Ouvindo comando de voz...</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <!-- Visual Waveform simulator -->
+                            <div class="flex items-center gap-0.5 h-6">
+                                <div class="w-1 bg-primary rounded-full animate-bounce h-3" style="animation-delay:0.1s"></div>
+                                <div class="w-1 bg-primary rounded-full animate-bounce h-5" style="animation-delay:0.2s"></div>
+                                <div class="w-1 bg-primary rounded-full animate-bounce h-4" style="animation-delay:0.3s"></div>
+                                <div class="w-1 bg-primary rounded-full animate-bounce h-6" style="animation-delay:0.4s"></div>
+                                <div class="w-1 bg-primary rounded-full animate-bounce h-2" style="animation-delay:0.5s"></div>
+                            </div>
+                            <button class="btn btn-secondary py-1.5 px-3 text-xs" onclick="toggleReportVoiceInput()">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FILTER PARAMETERS PANEL -->
+                <div id="report-filters-panel" class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-sm no-print">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <!-- Module selector -->
+                        <div class="md:col-span-3">
+                            <label for="report-module-select" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="lbl_module">Módulo do Relatório</label>
+                            <select id="report-module-select" class="form-input w-full" onchange="onReportModuleChange()">
+                                <option value="financeiro">Finanças / Caixa</option>
+                                <option value="insumos">Defensivos / Insumos</option>
+                                <option value="combustivel">Uso de Combustível</option>
+                                <option value="producao">Colheitas e Produção</option>
+                                <option value="cadastros">Cadastro Geral (Ativos)</option>
+                            </select>
+                        </div>
+
+                        <!-- Date Start -->
+                        <div class="md:col-span-2.5 col-span-1">
+                            <label for="report-start-date" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="lbl_start_date">Data Inicial</label>
+                            <input type="date" id="report-start-date" class="form-input w-full"/>
+                        </div>
+
+                        <!-- Date End -->
+                        <div class="md:col-span-2.5 col-span-1">
+                            <label for="report-end-date" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="lbl_end_date">Data Final</label>
+                            <input type="date" id="report-end-date" class="form-input w-full"/>
+                        </div>
+
+                        <!-- Related Item filter (dynamic) -->
+                        <div class="md:col-span-4">
+                            <label for="report-entity-select" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="lbl_related_item">Filtro de Item Específico</label>
+                            <select id="report-entity-select" class="form-input w-full">
+                                <!-- Preenchido dinamicamente -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Quick ranges & Action buttons -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-6 pt-4 border-t border-outline-variant/50">
+                        <!-- Quick Ranges -->
+                        <div class="flex flex-wrap gap-1.5 items-center">
+                            <span class="text-xs font-bold text-on-surface-variant mr-1" data-i18n="lbl_quick_ranges">Períodos Rápidos:</span>
+                            <button class="bg-surface-container hover:bg-primary/10 hover:text-primary text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-outline-variant/40 transition-colors cursor-pointer" onclick="setReportQuickRange('este_mes')">Este Mês</button>
+                            <button class="bg-surface-container hover:bg-primary/10 hover:text-primary text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-outline-variant/40 transition-colors cursor-pointer" onclick="setReportQuickRange('mes_passado')">Mês Passado</button>
+                            <button class="bg-surface-container hover:bg-primary/10 hover:text-primary text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-outline-variant/40 transition-colors cursor-pointer" onclick="setReportQuickRange('3_meses')">3 Meses</button>
+                            <button class="bg-surface-container hover:bg-primary/10 hover:text-primary text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-outline-variant/40 transition-colors cursor-pointer" onclick="setReportQuickRange('ano_atual')">Ano Atual</button>
+                            <button class="bg-surface-container hover:bg-primary/10 hover:text-primary text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-outline-variant/40 transition-colors cursor-pointer" onclick="setReportQuickRange('tudo')">Limpar Filtros</button>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <button class="btn btn-secondary flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl font-bold flex-grow sm:flex-grow-0 border border-outline-variant shadow-sm" onclick="printActiveReport()">
+                                <span class="material-symbols-outlined text-[18px]">print</span>
+                                <span data-i18n="btn_print">Imprimir Relatório</span>
+                            </button>
+                            <button class="btn btn-primary flex items-center justify-center gap-1.5 py-2 px-5 rounded-xl font-bold flex-grow sm:flex-grow-0" onclick="triggerManualReportGeneration()">
+                                <span class="material-symbols-outlined text-[18px]">refresh</span>
+                                <span data-i18n="btn_generate">Gerar Relatório</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REPORT RESULTS CONTAINER (PRINTABLE AREA) -->
+                <div id="report-print-area" class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-sm flex flex-col gap-6 min-h-[300px]">
+                    <!-- Report Header -->
+                    <div class="flex justify-between items-start border-b border-outline-variant pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-outline-variant no-print">
+                                <span class="material-symbols-outlined text-primary text-2xl" id="report-header-icon">analytics</span>
+                            </div>
+                            <div>
+                                <h2 class="font-headline-md text-lg font-bold text-on-surface uppercase tracking-wide" id="report-rendered-title">Relatório</h2>
+                                <p class="text-xs text-on-surface-variant opacity-80" id="report-rendered-subtitle">Período: - | Item: Todos</p>
+                            </div>
+                        </div>
+                        <div class="text-right text-xs text-on-surface-variant">
+                            <p class="font-bold text-primary">AURELIUS SYSTEM</p>
+                            <p class="text-[10px] opacity-75" id="report-generated-timestamp">Gerado em: -</p>
+                        </div>
+                    </div>
+
+                    <!-- KPI Statistics Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="report-kpi-grid">
+                        <!-- Filled dynamically -->
+                    </div>
+
+                    <!-- Custom Chart Area -->
+                    <div class="border border-outline-variant rounded-xl p-5 bg-surface-container-low flex flex-col gap-3" id="report-chart-box">
+                        <h3 class="font-headline-md text-xs font-bold text-on-surface flex items-center gap-2 uppercase tracking-wide">
+                            <span class="material-symbols-outlined text-primary text-[18px]">monitoring</span>
+                            <span>Visualização Gráfica / Tendência</span>
+                        </h3>
+                        <div class="w-full h-48 flex items-center justify-center" id="report-chart-container">
+                            <!-- SVG Chart filled dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Details Table -->
+                    <div class="flex flex-col gap-2">
+                        <h3 class="font-headline-md text-xs font-bold text-on-surface flex items-center gap-2 uppercase tracking-wide">
+                            <span class="material-symbols-outlined text-primary text-[18px]">table_rows</span>
+                            <span>Registros Detalhados</span>
+                        </h3>
+                        <div class="overflow-x-auto border border-outline-variant rounded-xl bg-surface-container-low">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-surface-container-high text-on-surface border-b border-outline-variant font-semibold" id="report-table-header">
+                                        <!-- Dynamic columns -->
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-outline-variant/40" id="report-table-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Empty warning -->
+                        <div id="report-empty-message" class="hidden text-center py-12 text-on-surface-variant flex flex-col items-center gap-2">
+                            <span class="material-symbols-outlined text-3xl opacity-50">search_off</span>
+                            <p data-i18n="report_empty">Nenhum registro encontrado para os filtros selecionados.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- ================= VIEW 6: CONFIGURAÇÕES ================= -->
             <section id="view-configuracoes" class="tab-view flex flex-col gap-6">
                 <div>
@@ -1405,6 +1649,10 @@
             <button class="tabbar-item flex flex-col items-center justify-center gap-0.5 text-on-surface-variant" onclick="switchTab('inventario')">
                 <span class="material-symbols-outlined">inventory_2</span>
                 <span class="text-[9px] font-bold" data-i18n="tab_inventario">Invent.</span>
+            </button>
+            <button class="tabbar-item flex flex-col items-center justify-center gap-0.5 text-on-surface-variant" onclick="switchTab('relatorios')">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="text-[9px] font-bold" data-i18n="tab_relatorios">Relat.</span>
             </button>
         </nav>
         
