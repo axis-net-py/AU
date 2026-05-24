@@ -464,17 +464,21 @@ h1, h2, h3, h4, h5, h6 {
     border: none;
     color: var(--color-on-surface-variant);
     cursor: pointer;
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+    font-weight: 600;
     font-size: 0.875rem;
+    border-radius: 9999px !important;
+    transition: all 0.2s ease;
 }
 
 .nav-item:hover {
-    background-color: var(--color-surface-container-high);
+    background-color: var(--color-surface-container-high) !important;
 }
 
 .nav-item.active {
-    background-color: var(--color-primary-container);
-    color: var(--color-on-primary-container);
-    font-weight: bold;
+    background-color: var(--color-primary-container) !important;
+    color: var(--color-on-primary-container) !important;
+    font-weight: 700;
 }
 
 /* Tab Views management */
@@ -504,15 +508,21 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid transparent;
     color: var(--color-on-surface-variant);
     cursor: pointer;
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 6px 16px !important;
+    border-radius: 9999px !important; /* Consistently rounded-full pill shape */
+    transition: all 0.2s ease;
 }
 .tab-subnav-btn:hover {
-    background-color: var(--color-surface-container);
+    background-color: var(--color-surface-container) !important;
 }
 .tab-subnav-btn.active {
-    background-color: var(--color-primary-container);
-    color: var(--color-on-primary-container);
-    border-color: var(--color-outline-variant);
-    font-weight: bold;
+    background-color: var(--color-primary-container) !important;
+    color: var(--color-on-primary-container) !important;
+    border-color: var(--color-outline-variant) !important;
+    font-weight: 700;
 }
 
 /* Ticker design */
@@ -528,10 +538,13 @@ h1, h2, h3, h4, h5, h6 {
     background: transparent;
     cursor: pointer;
     color: var(--color-on-surface-variant);
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+    font-weight: 700;
+    border-radius: 9999px !important;
 }
 .lang-btn.active {
-    background-color: var(--color-primary);
-    color: var(--color-on-primary);
+    background-color: var(--color-primary) !important;
+    color: var(--color-on-primary) !important;
 }
 
 /* Theme Icons switch */
