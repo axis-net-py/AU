@@ -1300,44 +1300,7 @@
                     </div>
                 </div>
 
-                <!-- AI COMMAND BOX -->
-                <div id="report-ai-command-container" class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-sm relative overflow-hidden group no-print">
-                    <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-primary/5 blur-xl group-hover:scale-110 transition-transform duration-500"></div>
-                    <h3 class="font-headline-md text-xs font-bold text-on-surface mb-3 flex items-center gap-2 uppercase tracking-wide">
-                        <span class="material-symbols-outlined text-primary text-[20px]">smart_toy</span>
-                        <span data-i18n="lbl_generate_ai">Executar Comando IA</span>
-                    </h3>
-                    <div class="flex gap-2">
-                        <div class="relative flex-grow">
-                            <input type="text" id="report-ai-input" class="form-input w-full pr-12 font-body-md text-sm border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-xl" placeholder="Ex: 'Gere um relatório de caixa de maio'..." data-i18n-placeholder="ai_command_placeholder" onkeydown="handleReportAIKey(event)"/>
-                            <button id="report-mic-btn" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-all p-1 rounded-full bg-surface-container/30 border border-outline-variant/30 hover:bg-primary/10 hover:border-primary flex items-center justify-center cursor-pointer" onclick="toggleReportVoiceInput()" title="Comando de voz">
-                                <span class="material-symbols-outlined text-[18px]">mic</span>
-                            </button>
-                        </div>
-                        <button class="btn btn-primary btn-lg shrink-0" onclick="executeReportAICommand()">
-                            <span class="material-symbols-outlined text-[20px]">play_arrow</span>
-                            <span data-i18n="btn_execute">Executar</span>
-                        </button>
-                    </div>
-                    <!-- Listening Wave overlay -->
-                    <div id="report-voice-wave" class="hidden absolute inset-0 bg-primary-container/95 dark:bg-surface-dark/95 backdrop-blur-sm px-6 py-4 flex items-center justify-between z-10 transition-all duration-300">
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary text-xl font-bold animate-pulse">mic</span>
-                            <span id="report-voice-txt" class="text-xs font-bold text-primary animate-pulse">Ouvindo comando de voz...</span>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <!-- Visual Waveform simulator -->
-                            <div class="flex items-center gap-0.5 h-6">
-                                <div class="w-1 bg-primary rounded-full animate-bounce h-3" style="animation-delay:0.1s"></div>
-                                <div class="w-1 bg-primary rounded-full animate-bounce h-5" style="animation-delay:0.2s"></div>
-                                <div class="w-1 bg-primary rounded-full animate-bounce h-4" style="animation-delay:0.3s"></div>
-                                <div class="w-1 bg-primary rounded-full animate-bounce h-6" style="animation-delay:0.4s"></div>
-                                <div class="w-1 bg-primary rounded-full animate-bounce h-2" style="animation-delay:0.5s"></div>
-                            </div>
-                            <button class="btn btn-secondary btn-sm" onclick="toggleReportVoiceInput()">Cancelar</button>
-                        </div>
-                    </div>
-                </div>
+
 
                 <!-- FILTER PARAMETERS PANEL -->
                 <div id="report-filters-panel" class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-sm no-print">
