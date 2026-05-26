@@ -1649,9 +1649,8 @@ function setupFormEventListeners() {
     
     if (seedCostType && seedCalcFields && seedUnitPrice && seedArea && seedTotalCost) {
         const toggleCostFields = () => {
-            const selectedProdId = document.getElementById('seed-grain-product').value;
-            const selectedProd = db.seedsGrainsProducts.find(p => p.id === selectedProdId);
-            const unit = selectedProd ? selectedProd.unit : 'Sacas';
+            const unitSelect = document.getElementById('seed-grain-unit');
+            const unit = unitSelect ? unitSelect.value : 'Sacas';
 
             if (seedCalcFields) {
                 seedCalcFields.classList.remove('hidden');
@@ -1682,9 +1681,8 @@ function setupFormEventListeners() {
         };
 
         const recalcSeedCost = () => {
-            const selectedProdId = document.getElementById('seed-grain-product').value;
-            const selectedProd = db.seedsGrainsProducts.find(p => p.id === selectedProdId);
-            const unit = selectedProd ? selectedProd.unit : 'Sacas';
+            const unitSelect = document.getElementById('seed-grain-unit');
+            const unit = unitSelect ? unitSelect.value : 'Sacas';
 
             const qty = parseFloat(seedQtyInput.value) || 0;
             const price = parseFloat(seedUnitPrice.value) || 0;
@@ -1702,6 +1700,10 @@ function setupFormEventListeners() {
         };
 
         seedCostType.addEventListener('change', toggleCostFields);
+        const seedUnitSelect = document.getElementById('seed-grain-unit');
+        if (seedUnitSelect) {
+            seedUnitSelect.addEventListener('change', toggleCostFields);
+        }
         seedQtyInput.addEventListener('input', recalcSeedCost);
         seedUnitPrice.addEventListener('input', recalcSeedCost);
         seedArea.addEventListener('input', recalcSeedCost);
@@ -5821,7 +5823,10 @@ function onSeedGrainProductChange() {
     if (!prod) return;
 
     const unitInput = document.getElementById('seed-grain-unit');
-    if (unitInput) unitInput.value = prod.unit || 'Sacas';
+    if (unitInput) {
+        unitInput.value = prod.unit || 'Sacas';
+        unitInput.dispatchEvent(new Event('change'));
+    }
 
     const typeSelect = document.getElementById('seed-grain-type');
     if (typeSelect) {
