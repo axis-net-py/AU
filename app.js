@@ -1262,6 +1262,12 @@ function migratePesticideStockToMovements() {
 
 function migrateLegacyData() {
     if (!db.seedsGrainsProducts) db.seedsGrainsProducts = [];
+    if (db.seedsGrainsProducts.length === 0) {
+        db.seedsGrainsProducts.push(
+            { id: 'sg-prod-def-1', name: 'Soja Convencional', category: 'Semente', unit: 'Sacas' },
+            { id: 'sg-prod-def-2', name: 'Milho Safrinha', category: 'Grão', unit: 'Sacas' }
+        );
+    }
     if (!db.seedsGrainsMovements) db.seedsGrainsMovements = [];
     if (!db.fuels) db.fuels = [];
     if (!db.fuelMovements) db.fuelMovements = [];
@@ -1643,40 +1649,54 @@ function setupFormEventListeners() {
     
     if (seedCostType && seedCalcFields && seedUnitPrice && seedArea && seedTotalCost) {
         const toggleCostFields = () => {
-            const val = seedCostType.value;
-            if (val === 'Total') {
-                seedCalcFields.classList.add('hidden');
-            } else {
+            const selectedProdId = document.getElementById('seed-grain-product').value;
+            const selectedProd = db.seedsGrainsProducts.find(p => p.id === selectedProdId);
+            const unit = selectedProd ? selectedProd.unit : 'Sacas';
+
+            if (seedCalcFields) {
                 seedCalcFields.classList.remove('hidden');
-                if (val === 'Saca') {
-                    const selectedProdId = document.getElementById('seed-grain-product').value;
-                    const selectedProd = db.seedsGrainsProducts.find(p => p.id === selectedProdId);
-                    const unitLabel = selectedProd ? selectedProd.unit : 'Saca';
-                    seedUnitPriceLabel.textContent = currentLanguage === 'pt-BR' ? `Preço por ${unitLabel}` : `Precio por ${unitLabel}`;
-                    seedAreaGroup.classList.add('hidden');
-                    seedArea.removeAttribute('required');
-                } else if (val === 'Hectare') {
-                    seedUnitPriceLabel.textContent = currentLanguage === 'pt-BR' ? 'Preço por Hectare' : 'Precio por Hectarea';
+            }
+
+            if (unit === 'Hectareas') {
+                if (seedUnitPriceLabel) {
+                    seedUnitPriceLabel.textContent = currentLanguage === 'pt-BR' ? 'Preço por Hectare' : 'Precio por Hectárea';
+                }
+                if (seedAreaGroup) {
                     seedAreaGroup.classList.remove('hidden');
+                }
+                if (seedArea) {
                     seedArea.setAttribute('required', 'true');
+                }
+            } else {
+                if (seedUnitPriceLabel) {
+                    seedUnitPriceLabel.textContent = currentLanguage === 'pt-BR' ? `Preço por ${unit}` : `Precio por ${unit}`;
+                }
+                if (seedAreaGroup) {
+                    seedAreaGroup.classList.add('hidden');
+                }
+                if (seedArea) {
+                    seedArea.removeAttribute('required');
                 }
             }
             recalcSeedCost();
         };
 
         const recalcSeedCost = () => {
-            const type = seedCostType.value;
+            const selectedProdId = document.getElementById('seed-grain-product').value;
+            const selectedProd = db.seedsGrainsProducts.find(p => p.id === selectedProdId);
+            const unit = selectedProd ? selectedProd.unit : 'Sacas';
+
             const qty = parseFloat(seedQtyInput.value) || 0;
             const price = parseFloat(seedUnitPrice.value) || 0;
             const area = parseFloat(seedArea.value) || 0;
-            
-            if (type === 'Saca') {
-                if (qty > 0 && price > 0) {
-                    seedTotalCost.value = (qty * price).toFixed(2);
-                }
-            } else if (type === 'Hectare') {
+
+            if (unit === 'Hectareas') {
                 if (area > 0 && price > 0) {
                     seedTotalCost.value = (area * price).toFixed(2);
+                }
+            } else {
+                if (qty > 0 && price > 0) {
+                    seedTotalCost.value = (qty * price).toFixed(2);
                 }
             }
         };
@@ -3803,6 +3823,7 @@ function populateSelectDropdowns() {
             opt.textContent = `${p.name} (${p.category})`;
             seedGrainProductSelect.appendChild(opt);
         });
+        onSeedGrainProductChange();
     }
 
     const seedGrainPlotSelect = document.getElementById('seed-grain-plot');
@@ -4304,11 +4325,11 @@ function openModal(modalId) {
     if (modalId === 'modal-add-semente-grao') {
         const costTypeSelect = document.getElementById('seed-grain-cost-type');
         if (costTypeSelect) {
-            costTypeSelect.value = 'Total';
+            costTypeSelect.value = 'Saca';
         }
         const calcFields = document.getElementById('seed-grain-cost-calc-fields');
         if (calcFields) {
-            calcFields.classList.add('hidden');
+            calcFields.classList.remove('hidden');
         }
         const qtyEl = document.getElementById('seed-grain-qty');
         if (qtyEl) qtyEl.value = '';
@@ -4322,6 +4343,7 @@ function openModal(modalId) {
         if (costEl) costEl.value = '';
         const autoTxEl = document.getElementById('seed-grain-auto-tx');
         if (autoTxEl) autoTxEl.checked = true;
+        onSeedGrainProductChange();
     }
     
     // Preset weather values dynamically inside apply modals

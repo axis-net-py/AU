@@ -2358,7 +2358,7 @@
 
             <!-- Financial fields for Purchase / Sale / Harvest -->
             <div id="seed-grain-financial-fields" class="mb-4">
-                <div class="form-group mb-4" id="seed-grain-cost-type-group">
+                <div class="form-group mb-4" id="seed-grain-cost-type-group" style="display: none;">
                     <label for="seed-grain-cost-type" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Tipo de Custo</label>
                     <select id="seed-grain-cost-type" class="form-input">
                         <option value="Total">Custo Total</option>
@@ -2368,7 +2368,7 @@
                 </div>
 
                 <!-- Conditional cost calculation fields -->
-                <div id="seed-grain-cost-calc-fields" class="grid grid-cols-2 gap-4 mb-4 hidden">
+                <div id="seed-grain-cost-calc-fields" class="grid grid-cols-2 gap-4 mb-4">
                     <div class="form-group" id="seed-grain-unit-price-group">
                         <label for="seed-grain-unit-price" id="seed-grain-unit-price-label" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Preço Unitário</label>
                         <input type="number" step="0.01" id="seed-grain-unit-price" class="form-input text-right" placeholder="0.00"/>

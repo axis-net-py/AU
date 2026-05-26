@@ -154,5 +154,22 @@ db.transactions.push({
 assert.strictEqual(db.pesticideMovements[0].payment_type, 'A prazo', 'Pesticide movement payment type fails');
 assert.strictEqual(db.transactions[db.transactions.length - 1].payment_status, 'pendente', 'Pesticide transaction status fails');
 
+// E. Test variety-based automatic cost calculations
+function calculateCost(productId, qty, price, area) {
+    const prod = db.seedsGrainsProducts.find(p => p.id === productId);
+    if (!prod) return 0;
+    if (prod.unit === 'Hectareas') {
+        return area * price;
+    } else {
+        return qty * price;
+    }
+}
+
+db.seedsGrainsProducts.push({ id: 'sg-prod-4', name: 'Alfalfa de Corte', category: 'Semente', unit: 'Hectareas' });
+
+assert.strictEqual(calculateCost('sg-prod-1', 10, 50, 5), 500, 'Calculation for Sacas fails'); // qty (10) * price (50) = 500
+assert.strictEqual(calculateCost('sg-prod-4', 10, 150, 5), 750, 'Calculation for Hectareas fails'); // area (5) * price (150) = 750
+
 console.log('✅ Inventory and Deferred Payments unit tests passed successfully!');
 process.exit(0);
+
