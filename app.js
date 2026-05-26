@@ -729,6 +729,7 @@ const defaultDatabase = {
     staff: [],
     fuelLogs: [],
     pesticides: [],
+    pesticideMovements: [],
     applications: [],
     transactions: [],
     safras: [
@@ -810,6 +811,13 @@ function startApp() {
         }
     } catch (e) {
         console.error("Error setting up finance fields toggle:", e);
+    }
+    
+    // Setup dynamic form cost calculators
+    try {
+        setupFormEventListeners();
+    } catch (e) {
+        console.error("Error setting up form event listeners:", e);
     }
     
     // Fetch real-time exchange rates on startup
@@ -1152,9 +1160,12 @@ function initDatabase() {
     if (!db.staff || !Array.isArray(db.staff)) db.staff = [];
     if (!db.fuelLogs || !Array.isArray(db.fuelLogs)) db.fuelLogs = [];
     if (!db.pesticides || !Array.isArray(db.pesticides)) db.pesticides = [];
+    if (!db.pesticideMovements || !Array.isArray(db.pesticideMovements)) db.pesticideMovements = [];
     if (!db.applications || !Array.isArray(db.applications)) db.applications = [];
     if (!db.transactions || !Array.isArray(db.transactions)) db.transactions = [];
     if (!db.seedsGrains || !Array.isArray(db.seedsGrains)) db.seedsGrains = [];
+    
+    migratePesticideStockToMovements();
     
     if (!db.safras || !Array.isArray(db.safras) || db.safras.length === 0) {
         db.safras = [
@@ -1212,6 +1223,301 @@ function initDatabase() {
     }
 }
 
+function migratePesticideStockToMovements() {
+    if (!db.pesticideMovements || !Array.isArray(db.pesticideMovements)) db.pesticideMovements = [];
+    
+    db.pesticides.forEach(p => {
+        const hasMovements = db.pesticideMovements.some(m => m.pesticide_id === p.id);
+        if (!hasMovements && p.stock_liters > 0) {
+            db.pesticideMovements.push({
+                id: 'mov-init-' + p.id + '-' + Date.now(),
+                pesticide_id: p.id,
+                type: 'entrada',
+                date: new Date().toISOString().split('T')[0],
+                quantity: p.stock_liters,
+                unit_price: 0,
+                total_cost: 0,
+                currency: 'BRL',
+                payment_date: '',
+                description: currentLanguage === 'pt-BR' ? 'Estoque Inicial Migrado' : 'Stock Inicial Migrado'
+            });
+        }
+    });
+}
+
+function getPesticideStock(pesticideId) {
+    if (!db.pesticideMovements) return 0;
+    const entries = db.pesticideMovements.filter(m => m.pesticide_id === pesticideId && m.type === 'entrada');
+    const exits = db.pesticideMovements.filter(m => m.pesticide_id === pesticideId && m.type === 'saida');
+    const totalIn = entries.reduce((sum, m) => sum + (parseFloat(m.quantity) || 0), 0);
+    const totalOut = exits.reduce((sum, m) => sum + (parseFloat(m.quantity) || 0), 0);
+    return Math.max(0, totalIn - totalOut);
+}
+
+function renderMovementsList(pesticideId) {
+    if (!db.pesticideMovements) return '';
+    const movs = db.pesticideMovements.filter(m => m.pesticide_id === pesticideId);
+    if (movs.length === 0) {
+        return `<div class="text-[10px] text-on-surface-variant opacity-60 text-center py-2">${currentLanguage === 'pt-BR' ? 'Nenhuma movimentação' : 'Sin movimientos'}</div>`;
+    }
+    
+    const sorted = [...movs].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+    
+    let html = '';
+    sorted.forEach(m => {
+        const isEntrada = m.type === 'entrada';
+        const typeBadge = isEntrada
+            ? `<span class="text-primary font-bold text-[9px] bg-primary/10 px-1 rounded">IN</span>`
+            : `<span class="text-error font-bold text-[9px] bg-error/10 px-1 rounded">OUT</span>`;
+            
+        const dateObj = new Date(m.date + 'T00:00:00');
+        const dateStr = dateObj.toLocaleDateString(currentLanguage === 'pt-BR' ? 'pt-BR' : 'es-PY', { day: 'numeric', month: 'short' });
+        
+        let details = m.description || '';
+        if (!details) {
+            if (isEntrada) {
+                details = currentLanguage === 'pt-BR' ? 'Entrada manual' : 'Entrada manual';
+            } else {
+                details = currentLanguage === 'pt-BR' ? 'Aplicação' : 'Aplicación';
+            }
+        }
+        
+        let costInfo = '';
+        if (isEntrada && m.total_cost > 0) {
+            costInfo = ` | <span class="font-data-numeral">${formatCurrency(m.total_cost, m.currency)}</span>`;
+        }
+        
+        let dueInfo = '';
+        if (isEntrada && m.payment_date) {
+            const dueObj = new Date(m.payment_date + 'T00:00:00');
+            const dueStr = dueObj.toLocaleDateString(currentLanguage === 'pt-BR' ? 'pt-BR' : 'es-PY', { day: 'numeric', month: 'short' });
+            dueInfo = ` <span class="text-[9px] bg-surface-container-high px-1 rounded text-on-surface-variant" title="${currentLanguage === 'pt-BR' ? 'Vencimento / Pagamento' : 'Vencimiento / Pago'}">📅 ${dueStr}</span>`;
+        }
+        
+        html += `
+            <div class="flex items-center justify-between text-[11px] py-1 border-b border-outline-variant/30 gap-1">
+                <div class="flex flex-col min-w-0">
+                    <div class="flex items-center gap-1">
+                        ${typeBadge}
+                        <span class="font-semibold text-on-surface-variant font-data-numeral">${dateStr}</span>
+                        <span class="font-bold text-on-surface truncate" title="${details}">${details}</span>
+                    </div>
+                    <div class="text-[10px] text-on-surface-variant/70 mt-0.5">
+                        <span class="font-bold text-on-surface font-data-numeral">${m.quantity} L</span>${costInfo}${dueInfo}
+                    </div>
+                </div>
+                <button class="text-on-surface-variant hover:text-error p-0.5 transition-colors shrink-0" onclick="deletePesticideMovement('${m.id}')" title="${currentLanguage === 'pt-BR' ? 'Excluir' : 'Eliminar'}">
+                    <span class="material-symbols-outlined text-[14px]">delete</span>
+                </button>
+            </div>
+        `;
+    });
+    return html;
+}
+
+function deletePesticideMovement(movId) {
+    if (!db.pesticideMovements) return;
+    const mov = db.pesticideMovements.find(m => m.id === movId);
+    if (!mov) return;
+    
+    const confirmMsg = currentLanguage === 'pt-BR'
+        ? `Remover esta movimentação de estoque permanentemente?`
+        : `¿Eliminar este movimiento de stock permanentemente?`;
+    if (!confirm(confirmMsg)) return;
+    
+    if (mov.type === 'saida' && mov.application_id) {
+        deleteApplication(mov.application_id);
+        return;
+    }
+    
+    const txId = 'tx-' + movId;
+    db.transactions = db.transactions.filter(t => t.id !== txId && t.movement_id !== movId);
+    db.pesticideMovements = db.pesticideMovements.filter(m => m.id !== movId);
+    
+    const pest = db.pesticides.find(p => p.id === mov.pesticide_id);
+    if (pest) {
+        pest.stock_liters = getPesticideStock(pest.id);
+    }
+    
+    saveDatabaseLocally();
+    renderInsumosView();
+    renderFinancialView();
+    renderDashboard();
+    renderInventarioView();
+    populateSelectDropdowns();
+    
+    showToast(currentLanguage === 'pt-BR' ? 'Movimentação excluída!' : '¡Movimiento eliminado!');
+}
+
+function openAddEntradaModal(pestId) {
+    const select = document.getElementById('entry-pesticide');
+    if (select) {
+        select.value = pestId;
+    }
+    const dateInput = document.getElementById('entry-date');
+    if (dateInput) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+    }
+    const qtyInput = document.getElementById('entry-qty');
+    if (qtyInput) qtyInput.value = '';
+    const unitPriceInput = document.getElementById('entry-unit-price');
+    if (unitPriceInput) unitPriceInput.value = '';
+    const totalCostInput = document.getElementById('entry-total-cost');
+    if (totalCostInput) totalCostInput.value = '';
+    const paymentDateInput = document.getElementById('entry-payment-date');
+    if (paymentDateInput) paymentDateInput.value = '';
+
+    openModal('modal-add-entrada-insumo');
+}
+
+function openAddSaidaModal(pestId) {
+    const select = document.getElementById('apply-pesticide');
+    if (select) {
+        select.value = pestId;
+    }
+    openModal('modal-add-insumo-aplicacao');
+}
+
+function handleFormSubmitPesticideEntry(e) {
+    e.preventDefault();
+    const pesticideId = document.getElementById('entry-pesticide').value;
+    const entryDate = document.getElementById('entry-date').value;
+    const qty = parseFloat(document.getElementById('entry-qty').value);
+    const unitPrice = parseFloat(document.getElementById('entry-unit-price').value) || 0;
+    const totalCost = parseFloat(document.getElementById('entry-total-cost').value) || 0;
+    const currency = document.getElementById('entry-currency').value;
+    const paymentDate = document.getElementById('entry-payment-date').value;
+    const autoTx = document.getElementById('entry-auto-tx').checked;
+    
+    if (pesticideId && qty > 0) {
+        const pest = db.pesticides.find(p => p.id === pesticideId);
+        if (!pest) return;
+        
+        const movId = 'mov-entry-' + Date.now();
+        const txId = 'tx-' + movId;
+        
+        db.pesticideMovements.push({
+            id: movId,
+            pesticide_id: pesticideId,
+            type: 'entrada',
+            date: entryDate,
+            quantity: qty,
+            unit_price: unitPrice,
+            total_cost: totalCost,
+            currency,
+            payment_date: paymentDate,
+            description: currentLanguage === 'pt-BR' ? 'Compra de Insumo' : 'Compra de Insumo'
+        });
+        
+        if (autoTx && totalCost > 0) {
+            db.transactions.unshift({
+                id: txId,
+                date: entryDate,
+                type: 'gasto',
+                description: `${currentLanguage === 'pt-BR' ? 'Compra de Insumo' : 'Compra de Insumo'}: ${pest.name}`,
+                amount: totalCost,
+                currency,
+                category: 'Insumos',
+                plot_id: '',
+                pesticide_id: pesticideId,
+                amount_purchased: qty,
+                movement_id: movId
+            });
+        }
+        
+        pest.stock_liters = getPesticideStock(pesticideId);
+        
+        saveDatabaseLocally();
+        closeModal('modal-add-entrada-insumo');
+        renderInsumosView();
+        renderInventarioView();
+        if (autoTx && totalCost > 0) {
+            renderFinancialView();
+            renderDashboard();
+        }
+        populateSelectDropdowns();
+        showToast(currentLanguage === 'pt-BR' ? 'Entrada registrada com sucesso!' : '¡Entrada registrada con éxito!');
+    }
+}
+
+function setupFormEventListeners() {
+    const entryQtyInput = document.getElementById('entry-qty');
+    const entryUnitPriceInput = document.getElementById('entry-unit-price');
+    const entryTotalCostInput = document.getElementById('entry-total-cost');
+    
+    if (entryQtyInput && entryUnitPriceInput && entryTotalCostInput) {
+        const recalcCost = () => {
+            const qty = parseFloat(entryQtyInput.value) || 0;
+            const price = parseFloat(entryUnitPriceInput.value) || 0;
+            if (qty > 0 && price > 0) {
+                entryTotalCostInput.value = (qty * price).toFixed(2);
+            }
+        };
+        const recalcPrice = () => {
+            const qty = parseFloat(entryQtyInput.value) || 0;
+            const cost = parseFloat(entryTotalCostInput.value) || 0;
+            if (qty > 0 && cost > 0) {
+                entryUnitPriceInput.value = (cost / qty).toFixed(2);
+            }
+        };
+        entryQtyInput.addEventListener('input', recalcCost);
+        entryUnitPriceInput.addEventListener('input', recalcCost);
+        entryTotalCostInput.addEventListener('input', recalcPrice);
+    }
+    
+    const seedQtyInput = document.getElementById('seed-grain-qty');
+    const seedCostType = document.getElementById('seed-grain-cost-type');
+    const seedCalcFields = document.getElementById('seed-grain-cost-calc-fields');
+    const seedUnitPrice = document.getElementById('seed-grain-unit-price');
+    const seedArea = document.getElementById('seed-grain-area');
+    const seedTotalCost = document.getElementById('seed-grain-cost');
+    const seedUnitPriceLabel = document.getElementById('seed-grain-unit-price-label');
+    const seedAreaGroup = document.getElementById('seed-grain-area-group');
+    
+    if (seedCostType && seedCalcFields && seedUnitPrice && seedArea && seedTotalCost) {
+        const toggleCostFields = () => {
+            const val = seedCostType.value;
+            if (val === 'Total') {
+                seedCalcFields.classList.add('hidden');
+            } else {
+                seedCalcFields.classList.remove('hidden');
+                if (val === 'Saca') {
+                    seedUnitPriceLabel.textContent = currentLanguage === 'pt-BR' ? 'Preço por Saca / Bag' : 'Precio por Saca / Bag';
+                    seedAreaGroup.classList.add('hidden');
+                    seedArea.removeAttribute('required');
+                } else if (val === 'Hectare') {
+                    seedUnitPriceLabel.textContent = currentLanguage === 'pt-BR' ? 'Preço por Hectare' : 'Precio por Hectarea';
+                    seedAreaGroup.classList.remove('hidden');
+                    seedArea.setAttribute('required', 'true');
+                }
+            }
+            recalcSeedCost();
+        };
+
+        const recalcSeedCost = () => {
+            const type = seedCostType.value;
+            const qty = parseFloat(seedQtyInput.value) || 0;
+            const price = parseFloat(seedUnitPrice.value) || 0;
+            const area = parseFloat(seedArea.value) || 0;
+            
+            if (type === 'Saca') {
+                if (qty > 0 && price > 0) {
+                    seedTotalCost.value = (qty * price).toFixed(2);
+                }
+            } else if (type === 'Hectare') {
+                if (area > 0 && price > 0) {
+                    seedTotalCost.value = (area * price).toFixed(2);
+                }
+            }
+        };
+
+        seedCostType.addEventListener('change', toggleCostFields);
+        seedQtyInput.addEventListener('input', recalcSeedCost);
+        seedUnitPrice.addEventListener('input', recalcSeedCost);
+        seedArea.addEventListener('input', recalcSeedCost);
+    }
+}
+
 // Auto-detect and wipe mock data helper for a clean user profile
 function clearMockDataIfPresent() {
     const hasMockPlots = db.plots && db.plots.some(p => p.id === 'plot-1' || p.id === 'plot-2' || p.id === 'plot-3');
@@ -1227,6 +1533,7 @@ function clearMockDataIfPresent() {
             staff: [],
             fuelLogs: [],
             pesticides: [],
+            pesticideMovements: [],
             applications: [],
             transactions: [],
             safras: [
@@ -2043,6 +2350,7 @@ async function fetchDatabaseFromCloud(userId) {
                         staff: [],
                         fuelLogs: [],
                         pesticides: [],
+                        pesticideMovements: [],
                         applications: [],
                         transactions: [],
                         purged: true,
@@ -2085,9 +2393,12 @@ async function fetchDatabaseFromCloud(userId) {
             if (!db.staff || !Array.isArray(db.staff)) db.staff = [];
             if (!db.fuelLogs || !Array.isArray(db.fuelLogs)) db.fuelLogs = [];
             if (!db.pesticides || !Array.isArray(db.pesticides)) db.pesticides = [];
+            if (!db.pesticideMovements || !Array.isArray(db.pesticideMovements)) db.pesticideMovements = [];
             if (!db.applications || !Array.isArray(db.applications)) db.applications = [];
             if (!db.transactions || !Array.isArray(db.transactions)) db.transactions = [];
             if (!db.seedsGrains || !Array.isArray(db.seedsGrains)) db.seedsGrains = [];
+            
+            migratePesticideStockToMovements();
             if (!db.safras || !Array.isArray(db.safras) || db.safras.length === 0) {
                 db.safras = [
                     {
@@ -2108,6 +2419,7 @@ async function fetchDatabaseFromCloud(userId) {
                     staff: [],
                     fuelLogs: [],
                     pesticides: [],
+                    pesticideMovements: [],
                     applications: [],
                     transactions: [],
                     purged: true,
@@ -2643,8 +2955,8 @@ function renderInventarioView() {
     const t = translations[currentLanguage];
     
     // Total pesticide volume across all products
-    const totalPesticideLiters = db.pesticides.reduce((sum, p) => sum + (p.stock_liters || 0), 0);
-    const lowStockPesticides = db.pesticides.filter(p => p.stock_liters < 100).length;
+    const totalPesticideLiters = db.pesticides.reduce((sum, p) => sum + (getPesticideStock(p.id) || 0), 0);
+    const lowStockPesticides = db.pesticides.filter(p => getPesticideStock(p.id) < 100).length;
     
     const elTotalPest = document.getElementById('inv-kpi-total-pesticides');
     const elLowPest = document.getElementById('inv-kpi-low-pesticides');
@@ -2677,7 +2989,8 @@ function renderInventarioView() {
             pestTbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-on-surface-variant opacity-60">${t.inv_no_data}</td></tr>`;
         } else {
             db.pesticides.forEach(p => {
-                const isLow = p.stock_liters < 100;
+                const currentStock = getPesticideStock(p.id);
+                const isLow = currentStock < 100;
                 const statusBadge = isLow
                     ? `<span class="bg-error-container text-on-error-container text-[9px] px-2 py-0.5 rounded font-bold uppercase animate-pulse">${t.inv_low_stock_warning}</span>`
                     : `<span class="bg-primary/10 text-primary text-[9px] px-2 py-0.5 rounded font-bold uppercase">${t.inv_ok_stock}</span>`;
@@ -2694,7 +3007,7 @@ function renderInventarioView() {
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-on-surface">${p.name}</td>
                     <td class="p-4"><span class="bg-tertiary-container/30 text-on-tertiary-container text-[9px] px-2 py-0.5 rounded font-bold uppercase">${p.type}</span></td>
-                    <td class="p-4 font-data-numeral ${qtyClass}">${p.stock_liters.toLocaleString()} L</td>
+                    <td class="p-4 font-data-numeral ${qtyClass}">${currentStock.toLocaleString()} L</td>
                     <td class="p-4">${statusBadge}</td>
                     <td class="p-4 font-data-numeral text-on-surface-variant">${costStr}</td>
                 `;
@@ -2760,6 +3073,7 @@ function renderInventarioView() {
 
 // Module 4: Pesticides chemical stocks & applications
 function renderInsumosView() {
+    const t = translations[currentLanguage];
     // 1. Stock Cards
     const pestContainer = document.getElementById('pesticide-stock-container');
     if (pestContainer) {
@@ -2769,7 +3083,8 @@ function renderInsumosView() {
             card.className = 'bg-surface-container-lowest border border-outline-variant rounded-xl p-5 hover:scale-[1.02] transition-all relative';
             
             // Highlight low stocks below 100 liters
-            const isLow = p.stock_liters < 100;
+            const currentStock = getPesticideStock(p.id);
+            const isLow = currentStock < 100;
             const stockColorClass = isLow ? 'text-error font-bold' : 'text-primary font-bold';
             
             card.innerHTML = `
@@ -2778,9 +3093,34 @@ function renderInsumosView() {
                     ${isLow ? '<span class="bg-error-container text-on-error-container font-extrabold text-[8px] px-2 py-0.5 rounded animate-pulse uppercase">Estoque Baixo</span>' : ''}
                 </div>
                 <h4 class="font-headline-md font-bold mb-3 text-on-surface">${p.name}</h4>
-                <div class="flex justify-between items-end border-t border-outline-variant/60 pt-3">
+                <div class="flex justify-between items-end border-t border-outline-variant/60 pt-3 pb-2">
                     <span class="text-xs text-on-surface-variant font-bold uppercase">Volume Livre</span>
-                    <span class="font-data-numeral text-md ${stockColorClass}">${p.stock_liters} Litros</span>
+                    <span class="font-data-numeral text-md ${stockColorClass}">${currentStock} L</span>
+                </div>
+                
+                <!-- Action buttons for Entry/Exit -->
+                <div class="flex gap-2 mt-3 pt-2 border-t border-outline-variant/40">
+                    <button class="btn btn-secondary btn-sm flex-grow text-[10px] py-1.5 flex items-center justify-center gap-1" onclick="openAddEntradaModal('${p.id}')">
+                        <span class="material-symbols-outlined text-[14px]">login</span>
+                        <span>Entrada</span>
+                    </button>
+                    <button class="btn btn-secondary btn-sm flex-grow text-[10px] py-1.5 flex items-center justify-center gap-1" onclick="openAddSaidaModal('${p.id}')">
+                        <span class="material-symbols-outlined text-[14px]">logout</span>
+                        <span>Aplicação</span>
+                    </button>
+                </div>
+
+                <!-- Collapsible Movements History -->
+                <div class="mt-4 border-t border-outline-variant/40 pt-3">
+                    <details class="group">
+                        <summary class="list-none flex items-center justify-between text-xs text-on-surface-variant font-bold cursor-pointer hover:text-primary transition-colors">
+                            <span>Histórico de Movimentações</span>
+                            <span class="material-symbols-outlined text-[16px] group-open:rotate-180 transition-transform">expand_more</span>
+                        </summary>
+                        <div class="mt-2 flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
+                            ${renderMovementsList(p.id)}
+                        </div>
+                    </details>
                 </div>
             `;
             pestContainer.appendChild(card);
@@ -3182,6 +3522,7 @@ window.hideChartTooltip = function() {
 function populateSelectDropdowns() {
     const applyPlotSelect = document.getElementById('apply-plot');
     const applyPesticideSelect = document.getElementById('apply-pesticide');
+    const entryPesticideSelect = document.getElementById('entry-pesticide');
     const fuelMachSelect = document.getElementById('fuel-machinery');
     const finPlotSelect = document.getElementById('fin-plot');
     
@@ -3200,8 +3541,18 @@ function populateSelectDropdowns() {
         db.pesticides.forEach(p => {
             const opt = document.createElement('option');
             opt.value = p.id;
-            opt.textContent = `${p.name} (${p.stock_liters}L)`;
+            opt.textContent = `${p.name} (${getPesticideStock(p.id)} L)`;
             applyPesticideSelect.appendChild(opt);
+        });
+    }
+
+    if (entryPesticideSelect) {
+        entryPesticideSelect.innerHTML = '';
+        db.pesticides.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = p.name;
+            entryPesticideSelect.appendChild(opt);
         });
     }
 
@@ -3231,7 +3582,7 @@ function populateSelectDropdowns() {
         db.pesticides.forEach(p => {
             const opt = document.createElement('option');
             opt.value = p.id;
-            opt.textContent = `${p.name} (${p.stock_liters}L)`;
+            opt.textContent = `${p.name} (${getPesticideStock(p.id)} L)`;
             finPesticideSelect.appendChild(opt);
         });
     }
@@ -3396,10 +3747,27 @@ function handleFormSubmitPesticideStock(e) {
         const id = 'pest-' + Date.now();
         db.pesticides.push({ id, name, type, stock_liters: stock });
         
+        const date = new Date().toISOString().split('T')[0];
+        const movId = 'mov-init-' + id + '-' + Date.now();
+        
+        if (stock > 0) {
+            db.pesticideMovements.push({
+                id: movId,
+                pesticide_id: id,
+                type: 'entrada',
+                date,
+                quantity: stock,
+                unit_price: cost > 0 ? (cost / stock) : 0,
+                total_cost: cost,
+                currency: costCurrency,
+                payment_date: '',
+                description: currentLanguage === 'pt-BR' ? 'Estoque Inicial' : 'Stock Inicial'
+            });
+        }
+        
         // If a cost was entered, automatically register financial expense
         if (cost > 0) {
             const txId = 'tx-' + Date.now();
-            const date = new Date().toISOString().split('T')[0];
             db.transactions.unshift({
                 id: txId,
                 date,
@@ -3410,7 +3778,8 @@ function handleFormSubmitPesticideStock(e) {
                 category: 'Insumos',
                 plot_id: '',
                 pesticide_id: id,
-                amount_purchased: stock
+                amount_purchased: stock,
+                movement_id: movId
             });
         }
 
@@ -3443,16 +3812,34 @@ function registerPesticideApplicationDirect(plotId, pesticideId, amount) {
         // Reduce stock in inventory
         const pest = db.pesticides.find(p => p.id === pesticideId);
         if (pest) {
-            if (pest.stock_liters < amount) {
+            const currentStock = getPesticideStock(pesticideId);
+            if (currentStock < amount) {
                 showToast(currentLanguage === 'pt-BR' ? 'Estoque insuficiente no depósito!' : '¡Stock insuficiente en el depósito!', true);
                 return;
             }
-            pest.stock_liters -= amount;
+            pest.stock_liters = Math.max(0, currentStock - amount);
         }
         
         const weatherCond = `${currentLanguage === 'pt-BR' ? 'Ensolarado' : 'Soleado'}, ${simulatedTemp}°C, ${currentLanguage === 'pt-BR' ? 'Vento' : 'Viento'} ${simulatedWindSpeed} km/h`;
         
         db.applications.unshift({ id, date, plot_id: plotId, pesticide_id: pesticideId, amount_applied: amount, weather_condition: weatherCond });
+        
+        // Add dynamic exit movement!
+        const plot = db.plots.find(p => p.id === plotId);
+        const plotName = plot ? plot.name : plotId;
+        db.pesticideMovements.push({
+            id: 'mov-app-' + id,
+            pesticide_id: pesticideId,
+            type: 'saida',
+            date: date,
+            quantity: amount,
+            unit_price: 0,
+            total_cost: 0,
+            currency: 'BRL',
+            payment_date: '',
+            description: (currentLanguage === 'pt-BR' ? 'Aplicação no ' : 'Aplicación en ') + plotName,
+            application_id: id
+        });
         
         saveDatabaseLocally();
         renderInsumosView();
@@ -3551,12 +3938,15 @@ function handleFormSubmitFinance(e) {
 
 function deleteTransaction(id) {
     const tx = db.transactions.find(t => t.id === id);
-    if (tx && tx.pesticide_id && tx.amount_purchased) {
+    if (tx) {
+        if (tx.movement_id) {
+            db.pesticideMovements = db.pesticideMovements.filter(m => m.id !== tx.movement_id);
+        } else {
+            db.pesticideMovements = db.pesticideMovements.filter(m => m.id !== 'mov-' + id && m.id !== id.replace('tx-', ''));
+        }
         const pest = db.pesticides.find(p => p.id === tx.pesticide_id);
         if (pest) {
-            pest.stock_liters = Math.max(0, (pest.stock_liters || 0) - tx.amount_purchased);
-            renderInsumosView();
-            populateSelectDropdowns();
+            pest.stock_liters = getPesticideStock(pest.id);
         }
     }
     
@@ -3564,6 +3954,9 @@ function deleteTransaction(id) {
     saveDatabaseLocally();
     renderFinancialView();
     renderDashboard();
+    renderInsumosView();
+    renderInventarioView();
+    populateSelectDropdowns();
 }
 
 function toggleFinanceInsumoFields() {
@@ -3591,6 +3984,29 @@ function openModal(modalId) {
         const finPestQty = document.getElementById('fin-pesticide-qty');
         if (finPestQty) finPestQty.value = '';
         toggleFinanceInsumoFields();
+    }
+    
+    if (modalId === 'modal-add-semente-grao') {
+        const costTypeSelect = document.getElementById('seed-grain-cost-type');
+        if (costTypeSelect) {
+            costTypeSelect.value = 'Total';
+        }
+        const calcFields = document.getElementById('seed-grain-cost-calc-fields');
+        if (calcFields) {
+            calcFields.classList.add('hidden');
+        }
+        const qtyEl = document.getElementById('seed-grain-qty');
+        if (qtyEl) qtyEl.value = '';
+        const nameEl = document.getElementById('seed-grain-name');
+        if (nameEl) nameEl.value = '';
+        const unitPriceEl = document.getElementById('seed-grain-unit-price');
+        if (unitPriceEl) unitPriceEl.value = '';
+        const areaEl = document.getElementById('seed-grain-area');
+        if (areaEl) areaEl.value = '';
+        const costEl = document.getElementById('seed-grain-cost');
+        if (costEl) costEl.value = '';
+        const autoTxEl = document.getElementById('seed-grain-auto-tx');
+        if (autoTxEl) autoTxEl.checked = true;
     }
     
     // Preset weather values dynamically inside apply modals
@@ -4976,6 +5392,10 @@ window.sendChatTextMessage = sendChatTextMessage;
 window.toggleVoiceInput = toggleVoiceInput;
 window.selectPestSample = selectPestSample;
 window.handlePestPhotoUpload = handlePestPhotoUpload;
+window.openAddEntradaModal = openAddEntradaModal;
+window.openAddSaidaModal = openAddSaidaModal;
+window.deletePesticideMovement = deletePesticideMovement;
+window.handleFormSubmitPesticideEntry = handleFormSubmitPesticideEntry;
 
 // ==================== 14. GRÃOS & SEMENTES & SAFRAS MODULES ====================
 
@@ -5192,6 +5612,10 @@ function handleFormSubmitSeedGrain(e) {
     const currency = document.getElementById('seed-grain-currency').value;
     const autoTx = document.getElementById('seed-grain-auto-tx').checked;
     
+    const costType = document.getElementById('seed-grain-cost-type').value;
+    const unitPrice = parseFloat(document.getElementById('seed-grain-unit-price').value) || 0;
+    const area = parseFloat(document.getElementById('seed-grain-area').value) || 0;
+    
     if (type && name && qty > 0 && safraId && cost >= 0) {
         const id = 'sg-' + Date.now();
         const today = new Date().toISOString().split('T')[0];
@@ -5205,7 +5629,10 @@ function handleFormSubmitSeedGrain(e) {
             safra_id: safraId,
             cost,
             currency,
-            date: today
+            date: today,
+            cost_type: costType,
+            unit_price: unitPrice,
+            area_ha: area
         });
         
         if (autoTx) {
@@ -5215,11 +5642,25 @@ function handleFormSubmitSeedGrain(e) {
             
             if (type === 'Semente Comprada' || type === 'Grão Colhido') {
                 const txType = type === 'Semente Comprada' ? 'gasto' : 'receita';
-                const txDesc = type === 'Semente Comprada'
-                    ? `${translations[currentLanguage].type_seed_bought || 'Compra Sementes'}: ${name} (${qty} ${unit}) - ${safraName}`
-                    : `${translations[currentLanguage].type_grain_harvested || 'Colheita Grãos'}: ${name} (${qty} ${unit}) - ${safraName}`;
                 
-                db.transactions.push({
+                let detailsStr = '';
+                if (type === 'Semente Comprada') {
+                    if (costType === 'Saca') {
+                        detailsStr = ` (${qty} ${unit} a ${formatCurrency(unitPrice, currency)}/${unit === 'Sacas' ? 'sc' : 'kg'})`;
+                    } else if (costType === 'Hectare') {
+                        detailsStr = ` (${area} ha a ${formatCurrency(unitPrice, currency)}/ha)`;
+                    } else {
+                        detailsStr = ` (${qty} ${unit})`;
+                    }
+                } else {
+                    detailsStr = ` (${qty} ${unit})`;
+                }
+                
+                const txDesc = type === 'Semente Comprada'
+                    ? `${translations[currentLanguage].type_seed_bought || 'Compra Sementes'}: ${name}${detailsStr} - ${safraName}`
+                    : `${translations[currentLanguage].type_grain_harvested || 'Colheita Grãos'}: ${name}${detailsStr} - ${safraName}`;
+                
+                db.transactions.unshift({
                     id: txId,
                     date: today,
                     description: txDesc,

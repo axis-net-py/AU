@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-    <title>Aurelius - Gestão Agrária Inteligente</title>
+    <title>AURELIUS</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -1889,7 +1890,7 @@
     <!-- 5. MODAL: REGISTER PESTICIDE (INVENTORY CADASTRO) -->
     <div id="modal-add-cadastro-insumo" class="modal-window fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] bg-surface-container-lowest border border-outline-variant p-6 rounded-2xl w-[90%] max-w-md shadow-2xl hidden">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="font-headline-md font-bold text-primary" data-i18n="modal_add_pesticide_title">Cadastrar Novo Insumo Defensivo</h3>
+            <h3 class="font-headline-md font-bold text-primary">Cadastrar Insumo no Catálogo</h3>
             <button class="hover:bg-surface-container p-1 rounded-full" onclick="closeModal('modal-add-cadastro-insumo')">
                 <span class="material-symbols-outlined">close</span>
             </button>
@@ -1897,21 +1898,21 @@
         
         <form onsubmit="handleFormSubmitPesticideStock(event)">
             <div class="form-group mb-4">
-                <label for="pesticide-name" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_pesticide_name">Nome Comercial do Insumo</label>
+                <label for="pesticide-name" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Nome Comercial do Insumo</label>
                 <input type="text" id="pesticide-name" required placeholder="Ex: Tebuconazole 250 EC" class="form-input"/>
             </div>
             
             <div class="form-group mb-4">
-                <label for="pesticide-type" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_pesticide_type">Tipo de Defensivo</label>
+                <label for="pesticide-type" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Tipo de Defensivo</label>
                 <select id="pesticide-type" class="form-input">
-                    <option value="Fungicida" data-i18n="type_fungicide">Fungicida (Combate fungos)</option>
-                    <option value="Herbicida" data-i18n="type_herbicide">Herbicida (Mata erva-daninha)</option>
-                    <option value="Inseticida" data-i18n="type_insecticide">Inseticida (Mata insetos)</option>
+                    <option value="Fungicida">Fungicida (Combate fungos)</option>
+                    <option value="Herbicida">Herbicida (Mata erva-daninha)</option>
+                    <option value="Inseticida">Inseticida (Mata insetos)</option>
                 </select>
             </div>
             
             <div class="form-group mb-4">
-                <label for="pesticide-stock" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant" data-i18n="label_pesticide_stock">Estoque Inicial (Litros / Kg)</label>
+                <label for="pesticide-stock" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Estoque Inicial (Litros / Kg)</label>
                 <input type="number" id="pesticide-stock" value="100" required class="form-input text-right"/>
             </div>
 
@@ -1919,7 +1920,7 @@
             <div class="bg-surface-container rounded-xl p-4 mb-6 border border-outline-variant/60">
                 <p class="text-[10px] font-bold text-on-surface-variant uppercase mb-3 flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-[14px] text-tertiary">attach_money</span>
-                    <span data-i18n="label_pesticide_cost">Custo de Aquisição (Opcional)</span>
+                    <span>Custo de Aquisição (Opcional)</span>
                 </p>
                 <div class="grid grid-cols-3 gap-3">
                     <div class="col-span-2">
@@ -1936,7 +1937,72 @@
                 <p class="text-[9px] text-on-surface-variant opacity-60 mt-2">Se informado, será lançado automaticamente como despesa no financeiro.</p>
             </div>
             
-            <button type="submit" class="btn btn-primary btn-lg w-full" data-i18n="btn_save">Salvar Insumo</button>
+            <button type="submit" class="btn btn-primary btn-lg w-full">Salvar Insumo no Catálogo</button>
+        </form>
+    </div>
+
+    <!-- 5B. MODAL: REGISTER PESTICIDE ENTRY (ADD STOCK) -->
+    <div id="modal-add-entrada-insumo" class="modal-window fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] bg-surface-container-lowest border border-outline-variant p-6 rounded-2xl w-[90%] max-w-md shadow-2xl hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-headline-md font-bold text-primary">Registrar Entrada no Estoque</h3>
+            <button class="hover:bg-surface-container p-1 rounded-full" onclick="closeModal('modal-add-entrada-insumo')">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <form onsubmit="handleFormSubmitPesticideEntry(event)">
+            <div class="form-group mb-4">
+                <label for="entry-pesticide" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Insumo / Defensivo</label>
+                <select id="entry-pesticide" required class="form-input">
+                    <!-- Dinamicamente preenchido pelo app.js -->
+                </select>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="entry-date" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Data da Entrada</label>
+                <input type="date" id="entry-date" required class="form-input"/>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="entry-qty" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Quantidade (Litros / Kg)</label>
+                <input type="number" step="0.1" id="entry-qty" required class="form-input text-right" placeholder="100"/>
+            </div>
+
+            <!-- Price and Cost fields -->
+            <div class="bg-surface-container rounded-xl p-4 mb-4 border border-outline-variant/60">
+                <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div class="form-group">
+                        <label for="entry-unit-price" class="block text-[10px] font-bold uppercase text-on-surface-variant">Preço por L / Kg</label>
+                        <input type="number" step="0.01" id="entry-unit-price" placeholder="0.00" class="form-input text-right"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="entry-total-cost" class="block text-[10px] font-bold uppercase text-on-surface-variant">Custo Total</label>
+                        <input type="number" step="0.01" id="entry-total-cost" placeholder="0.00" class="form-input text-right"/>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="col-span-3">
+                        <label for="entry-currency" class="block text-[10px] font-bold uppercase text-on-surface-variant">Moeda</label>
+                        <select id="entry-currency" class="form-input">
+                            <option value="BRL">BRL R$</option>
+                            <option value="USD">USD $</option>
+                            <option value="PYG">PYG ₲</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="entry-payment-date" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Data de Pagamento / Vencimento (Opcional)</label>
+                <input type="date" id="entry-payment-date" class="form-input"/>
+            </div>
+
+            <div class="form-group mb-6 flex items-center gap-2">
+                <input type="checkbox" id="entry-auto-tx" class="rounded border-outline-variant text-primary focus:ring-primary" checked/>
+                <label for="entry-auto-tx" class="text-xs font-bold text-on-surface-variant">Lançar despesa no Livro Caixa</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg w-full">Salvar Entrada</button>
         </form>
     </div>
 
@@ -2172,6 +2238,27 @@
                 <select id="seed-grain-safra" required class="form-input">
                     <!-- Dinamicamente preenchido pelo app.js -->
                 </select>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="seed-grain-cost-type" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Tipo de Custo</label>
+                <select id="seed-grain-cost-type" class="form-input">
+                    <option value="Total">Custo Total</option>
+                    <option value="Saca">Custo por Saca / Bag</option>
+                    <option value="Hectare">Custo por Hectare</option>
+                </select>
+            </div>
+
+            <!-- Conditional cost calculation fields -->
+            <div id="seed-grain-cost-calc-fields" class="grid grid-cols-2 gap-4 mb-4 hidden">
+                <div class="form-group" id="seed-grain-unit-price-group">
+                    <label for="seed-grain-unit-price" id="seed-grain-unit-price-label" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Preço Unitário</label>
+                    <input type="number" step="0.01" id="seed-grain-unit-price" class="form-input text-right" placeholder="0.00"/>
+                </div>
+                <div class="form-group" id="seed-grain-area-group">
+                    <label for="seed-grain-area" class="block text-xs font-bold mb-2 uppercase text-on-surface-variant">Área (Hectares)</label>
+                    <input type="number" step="0.1" id="seed-grain-area" class="form-input text-right" placeholder="0.0"/>
+                </div>
             </div>
 
             <div class="grid grid-cols-3 gap-2 mb-4">
