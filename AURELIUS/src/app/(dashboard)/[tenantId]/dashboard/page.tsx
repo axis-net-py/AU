@@ -1,9 +1,6 @@
 import { Suspense } from 'react';
 import { StatsCards } from '@/components/dashboard/StatsCards';
-import { SalesChart } from '@/components/dashboard/SalesChart';
-import { TopProducts } from '@/components/dashboard/TopProducts';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent } from '@/components/ui/card';
 import { AgroWeatherTelemetry } from '@/components/dashboard/AgroWeatherTelemetry';
 
 // Default date range - last 30 days
@@ -23,11 +20,11 @@ export default function DashboardPage() {
           Aurelius Dashboard
         </h1>
         <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-          30 dias
+          Painel de Controle
         </span>
       </div>
 
-      {/* Agro Weather & Telemetry GPS */}
+      {/* Agro Weather GPS */}
       <AgroWeatherTelemetry />
 
       {/* Stats Cards */}
@@ -42,37 +39,6 @@ export default function DashboardPage() {
       >
         <StatsCards dateRange={defaultDateRange} currency={defaultCurrency} />
       </Suspense>
-
-      {/* Charts and Tables */}
-      <div className="grid grid-cols-1 gap-4">
-        <Suspense
-          fallback={
-            <Card>
-              <CardContent className="p-4">
-                <Skeleton className="h-[250px] w-full" />
-              </CardContent>
-            </Card>
-          }
-        >
-          <SalesChart dateRange={defaultDateRange} currency={defaultCurrency} />
-        </Suspense>
-
-        <Suspense
-          fallback={
-            <Card>
-              <CardContent className="p-4">
-                <Skeleton className="h-[250px] w-full" />
-              </CardContent>
-            </Card>
-          }
-        >
-          <TopProducts
-            dateRange={defaultDateRange}
-            currency={defaultCurrency}
-            limit={5}
-          />
-        </Suspense>
-      </div>
     </div>
   );
 }

@@ -88,48 +88,48 @@ export function FieldList({ initialFields, tenantId }: { initialFields: Field[];
       <div className="flex justify-between items-center">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button className="rounded-xl bg-primary hover:bg-primary/95 text-white flex items-center gap-2 shadow-lg shadow-primary/10 border-none h-11">
+            <button className="axis-btn-primary h-[32px] px-4 text-[13px] rounded-lg shadow-sm flex items-center gap-2">
               <Plus className="h-4 w-4" /> Novo Talhão
-            </Button>
+            </button>
           </DialogTrigger>
-          <DialogContent className="rounded-[2.5rem] bg-card border border-border p-8 sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-bold font-heading text-primary">
+          <DialogContent className="sm:max-w-[425px] bg-card border border-border p-0 overflow-hidden rounded-lg shadow-lg">
+            <DialogHeader className="text-left space-y-1 p-6 border-b border-border bg-muted/30">
+              <DialogTitle className="text-[18px] font-bold tracking-tight text-foreground">
                 Adicionar Novo Talhão
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
+              <DialogDescription className="text-[12px] text-muted-foreground font-medium">
                 Cadastre um talhão/área da fazenda especificando as dimensões.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 pt-4">
+            <div className="p-6 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Nome do Talhão</Label>
+                <Label htmlFor="name" className="text-[11px] text-primary uppercase tracking-widest font-bold">Nome do Talhão</Label>
                 <Input
                   id="name"
                   placeholder="Ex: Talhão Norte"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="rounded-full bg-background border-border text-foreground"
+                  className="bg-background border-border text-[13px] h-[40px] rounded-lg font-medium shadow-sm focus:ring-primary/20"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="area">Área em Hectares (ha)</Label>
+                <Label htmlFor="area" className="text-[11px] text-primary uppercase tracking-widest font-bold">Área em Hectares (ha)</Label>
                 <Input
                   id="area"
                   type="number"
                   placeholder="Ex: 150"
                   value={area}
                   onChange={(e) => setArea(e.target.value)}
-                  className="rounded-full bg-background border-border text-foreground"
+                  className="bg-background border-border text-[13px] h-[40px] rounded-lg font-medium shadow-sm focus:ring-primary/20"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="soilType">Tipo de Solo</Label>
+                <Label htmlFor="soilType" className="text-[11px] text-primary uppercase tracking-widest font-bold">Tipo de Solo</Label>
                 <select
                   id="soilType"
                   value={soilType}
                   onChange={(e) => setSoilType(e.target.value)}
-                  className="w-full rounded-full bg-background border border-border text-foreground px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-lg bg-background border border-border text-foreground px-3 py-2 text-[13px] h-[40px] outline-none shadow-sm focus:ring-2 focus:ring-primary/20"
                 >
                   <option value="Argiloso">Argiloso</option>
                   <option value="Arenoso">Arenoso</option>
@@ -139,20 +139,20 @@ export function FieldList({ initialFields, tenantId }: { initialFields: Field[];
               </div>
 
               <div className="pt-4 flex gap-3">
-                <Button
+                <button
                   onClick={handleAdd}
                   disabled={isPending}
-                  className="flex-1 rounded-full h-11 bg-primary text-white border-none"
+                  className="bg-primary text-primary-foreground px-6 h-[40px] rounded-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-2 text-[14px] font-bold disabled:opacity-50 shadow-md active:scale-95 flex-1"
                 >
-                  {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
-                </Button>
-                <Button
-                  variant="outline"
+                  {isPending ? <Loader2 className="h-4 w-4 animate-spin text-secondary" /> : "Salvar"}
+                </button>
+                <button
+                  type="button"
                   onClick={() => setIsOpen(false)}
-                  className="flex-1 rounded-full h-11"
+                  className="px-4 h-[40px] rounded-lg text-[14px] font-semibold text-muted-foreground hover:bg-muted transition-all border border-border flex-1"
                 >
                   Cancelar
-                </Button>
+                </button>
               </div>
             </div>
           </DialogContent>
@@ -160,58 +160,56 @@ export function FieldList({ initialFields, tenantId }: { initialFields: Field[];
       </div>
 
       {/* Fields Table */}
-      <Card className="rounded-[2.5rem] border border-border shadow-md bg-card overflow-hidden">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50 border-b border-border">
-                <TableHead className="font-bold">Nome do Talhão</TableHead>
-                <TableHead className="font-bold">Área (ha)</TableHead>
-                <TableHead className="font-bold">Tipo de Solo</TableHead>
-                <TableHead className="font-bold">Status</TableHead>
-                <TableHead className="text-right font-bold">Ações</TableHead>
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Nome do Talhão</TableHead>
+              <TableHead className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Área (ha)</TableHead>
+              <TableHead className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Tipo de Solo</TableHead>
+              <TableHead className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Status</TableHead>
+              <TableHead className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {fields.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                  Nenhum talhão cadastrado ainda. Clique em "Novo Talhão" para adicionar.
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {fields.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    Nenhum talhão cadastrado ainda. Clique em "Novo Talhão" para adicionar.
+            ) : (
+              fields.map((field) => (
+                <TableRow key={field.id} className="hover:bg-muted/30 border-b border-border transition-colors">
+                  <TableCell className="font-medium flex items-center gap-2">
+                    <Compass className="h-4 w-4 text-primary shrink-0" />
+                    {field.name}
+                  </TableCell>
+                  <TableCell className="font-mono">{Number(field.areaHectares).toFixed(1)} ha</TableCell>
+                  <TableCell>{field.soilType || "Argiloso"}</TableCell>
+                  <TableCell>
+                    <Badge variant={field.status === "active" ? "default" : "secondary"} className="rounded-full">
+                      {field.status === "active" ? "Ativo" : "Inativo"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(field.id, field.name)}
+                        className="h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-full"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ) : (
-                fields.map((field) => (
-                  <TableRow key={field.id} className="hover:bg-muted/30 border-b border-border transition-colors">
-                    <TableCell className="font-medium flex items-center gap-2">
-                      <Compass className="h-4 w-4 text-primary shrink-0" />
-                      {field.name}
-                    </TableCell>
-                    <TableCell className="font-mono">{Number(field.areaHectares).toFixed(1)} ha</TableCell>
-                    <TableCell>{field.soilType || "Argiloso"}</TableCell>
-                    <TableCell>
-                      <Badge variant={field.status === "active" ? "default" : "secondary"} className="rounded-full">
-                        {field.status === "active" ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(field.id, field.name)}
-                          className="h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-full"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

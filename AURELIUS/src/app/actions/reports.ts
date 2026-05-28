@@ -92,3 +92,41 @@ export async function getReportData(
     }));
   }
 }
+
+export type ProductReportItem = {
+  id: string;
+  sku: string;
+  name: string;
+  currentStock: number;
+  minStock: number;
+  cost: number;
+  price: number;
+  currency: string;
+  category: string;
+};
+
+export async function getProductReportData(): Promise<ProductReportItem[]> {
+  const session = await auth();
+  if (!session?.user?.tenantId) throw new Error("Tenant não encontrado");
+  const tenantId = session.user.tenantId;
+
+  const products = await prisma.product.findMany({
+    where: {
+      tenantId,
+      isActive: true,
+    },
+    orderBy: { sku: "asc" },
+  });
+
+  return products.map((p) => ({
+    id: p.id,
+    sku: p.sku,
+    name: p.name,
+    currentStock: Number(p.currentStock),
+    minStock: Number(p.minStock),
+    cost: Number(p.cost),
+    price: Number(p.price),
+    currency: p.currency,
+    category: p.tags || "outros",
+  }));
+}

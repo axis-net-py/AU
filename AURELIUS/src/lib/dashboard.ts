@@ -8,37 +8,32 @@ export async function getDashboardStats(dateRange?: { start?: Date; end?: Date }
   if (!session?.user?.tenantId) throw new Error("Tenant nao encontrado");
   const tenantId = session.user.tenantId;
 
-  const startDate = dateRange?.start || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const endDate = dateRange?.end || new Date();
-
-  const [sales, purchases, lowStock, liquidity] = await Promise.all([
-    prisma.commercialInvoice.aggregate({
-      where: { tenantId, type: "SALES", status: "APPROVED", issuedAt: { gte: startDate, lte: endDate } },
-      _sum: { totalAmount: true },
-      _count: true,
+  const [fields, seasons, fleet, lowStock] = await Promise.all([
+    // Total Cultivated Area (Sum of active Field area in hectares)
+    prisma.field.aggregate({
+      where: { tenantId, status: "active" },
+      _sum: { areaHectares: true },
     }),
-    prisma.commercialInvoice.aggregate({
-      where: { tenantId, type: "PURCHASE", status: "APPROVED", issuedAt: { gte: startDate, lte: endDate } },
-      _sum: { totalAmount: true },
-      _count: true,
+    // Active Seasons (Count of active crop seasons)
+    prisma.cropSeason.count({
+      where: { tenantId, status: "active" },
     }),
+    // Fleet Size (Count of Machinery records)
+    prisma.machinery.count({
+      where: { tenantId },
+    }),
+    // Low Stock Inputs (Count of active products where currentStock <= minStock)
     prisma.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(*)::bigint as count FROM "Product"
       WHERE "tenantId" = ${tenantId} AND "isActive" = true AND "currentStock" <= "minStock"
     `.then((r) => Number(r[0]?.count ?? 0)),
-    prisma.commercialInvoice.aggregate({
-      where: { tenantId, type: "SALES", status: "APPROVED" },
-      _sum: { totalAmount: true },
-    }),
   ]);
 
   return {
-    salesTotal: sales._sum.totalAmount || 0,
-    salesCount: sales._count || 0,
-    purchasesTotal: purchases._sum.totalAmount || 0,
-    purchasesCount: purchases._count || 0,
+    totalArea: Number(fields._sum.areaHectares || 0),
+    activeSeasons: seasons,
+    fleetSize: fleet,
     lowStockAlerts: lowStock,
-    liquidity: liquidity._sum.totalAmount || 0,
   };
 }
 

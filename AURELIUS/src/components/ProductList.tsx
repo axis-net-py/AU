@@ -7,7 +7,14 @@ import { ProductSheet } from "@/components/ProductSheet";
 import type { Product } from "@prisma/client";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tag } from "lucide-react";
+
+const categories = [
+  { value: "sementes", label: "Sementes" },
+  { value: "insumos", label: "Insumos" },
+  { value: "combustivel", label: "Combustível" },
+  { value: "maquinario", label: "Maquinário / Peças" },
+  { value: "outros", label: "Outros" }
+];
 
 export function ProductList({ products, tenantId }: { products: Product[]; tenantId: string }) {
   const [search, setSearch] = useState("");
@@ -15,15 +22,6 @@ export function ProductList({ products, tenantId }: { products: Product[]; tenan
   const [selectedType, setSelectedType] = useState("all");
   const [sortField, setSortField] = useState<"sku" | "name" | "price" | "currentStock" | "isActive" | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
-  // Collect all unique tags from products
-  const allTags = Array.from(
-    new Set(
-      products
-        .flatMap((p) => (p.tags ? p.tags.split(",").map((t) => t.trim().toLowerCase()) : []))
-        .filter(Boolean)
-    )
-  ).sort();
 
   const handleSort = (field: "sku" | "name" | "price" | "currentStock" | "isActive") => {
     if (sortField === field) {
@@ -34,7 +32,7 @@ export function ProductList({ products, tenantId }: { products: Product[]; tenan
     }
   };
 
-  // Filter products based on search, selected tag and item type
+  // Filter products based on search, selected category (tag) and item type
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
       p.sku.toLowerCase().includes(search.toLowerCase()) ||
@@ -42,11 +40,7 @@ export function ProductList({ products, tenantId }: { products: Product[]; tenan
 
     const matchesTag =
       selectedTag === "all" ||
-      (p.tags &&
-        p.tags
-          .split(",")
-          .map((t) => t.trim().toLowerCase())
-          .includes(selectedTag));
+      (p.tags && p.tags.toLowerCase() === selectedTag.toLowerCase());
 
     const matchesType =
       selectedType === "all" ||
@@ -95,13 +89,13 @@ export function ProductList({ products, tenantId }: { products: Product[]; tenan
           />
           <Select value={selectedTag} onValueChange={setSelectedTag}>
             <SelectTrigger className="w-[180px] h-[38px] rounded-lg bg-card">
-              <SelectValue placeholder="Filtrar por Tag" />
+              <SelectValue placeholder="Filtrar por Categoria" />
             </SelectTrigger>
             <SelectContent className="rounded-lg">
-              <SelectItem value="all">Todas as Tags</SelectItem>
-              {allTags.map((tag) => (
-                <SelectItem key={tag} value={tag} className="capitalize">
-                  {tag}
+              <SelectItem value="all">Todas as Categorias</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.value} value={cat.value}>
+                  {cat.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -136,7 +130,7 @@ export function ProductList({ products, tenantId }: { products: Product[]; tenan
               <TableHead onClick={() => handleSort("currentStock")} className="cursor-pointer hover:bg-muted/50 select-none">
                 Estoque{renderSortIndicator("currentStock")}
               </TableHead>
-              <TableHead>Tags</TableHead>
+              <TableHead>Categoria</TableHead>
               <TableHead onClick={() => handleSort("isActive")} className="cursor-pointer hover:bg-muted/50 select-none">
                 Status{renderSortIndicator("isActive")}
               </TableHead>
@@ -173,18 +167,13 @@ export function ProductList({ products, tenantId }: { products: Product[]; tenan
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {product.tags && product.tags.split(",").map((tag) => {
-                        const trimmed = tag.trim();
-                        if (!trimmed) return null;
-                        return (
-                          <Badge key={trimmed} variant="outline" className="text-[10px] uppercase font-bold py-0.5 px-1.5 bg-primary/5 text-primary border-primary/20">
-                            {trimmed}
-                          </Badge>
-                        );
-                      })}
-                      {!product.tags && <span className="text-muted-foreground text-xs">-</span>}
-                    </div>
+                    {product.tags ? (
+                      <Badge variant="outline" className="text-[10px] uppercase font-bold py-0.5 px-1.5 bg-primary/5 text-primary border-primary/20">
+                        {categories.find(c => c.value === product.tags)?.label || product.tags}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">-</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={product.isActive ? "default" : "secondary"}>

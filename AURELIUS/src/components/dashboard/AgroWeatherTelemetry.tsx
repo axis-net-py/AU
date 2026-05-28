@@ -7,11 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { 
   CloudSun, 
   Droplets, 
-  Gauge, 
-  Navigation, 
+  MapPin, 
   Thermometer, 
   Wind, 
-  Zap, 
   RefreshCw 
 } from "lucide-react";
 
@@ -22,42 +20,52 @@ interface WeatherData {
   latitude: number;
   longitude: number;
   humidity?: number;
+  city?: string;
 }
 
 export function AgroWeatherTelemetry() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [weather, setWeatherData] = useState<WeatherData | null>(null);
-  const [telemetry, setTelemetry] = useState({
-    fuelRate: 42,
-    engineLoad: 78,
-    speed: 12.5,
-  });
 
   const fetchWeather = (lat: number, lon: number) => {
     setLoading(true);
     setError(null);
-    fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m`
-    )
-      .then((res) => {
+    
+    // Concurrent fetches for weather forecast and reverse geocoding
+    Promise.all([
+      fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m`
+      ).then((res) => {
         if (!res.ok) throw new Error("Erro ao obter previsão do tempo");
         return res.json();
+      }),
+      fetch(
+        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=pt`
+      ).then((res) => {
+        if (!res.ok) return null;
+        return res.json();
       })
-      .then((data) => {
-        const current = data.current_weather;
+    ])
+      .then(([weatherData, geoData]) => {
+        const current = weatherData.current_weather;
+        const resolvedCity = geoData 
+          ? (geoData.city || geoData.locality || geoData.principalSubdivision || "Sua Localização") 
+          : "Sua Localização";
+          
         setWeatherData({
           temp: current.temperature,
           windSpeed: current.windspeed,
           weatherCode: current.weathercode,
           latitude: lat,
           longitude: lon,
-          humidity: data.hourly?.relativehumidity_2m?.[0] || 65,
+          humidity: weatherData.hourly?.relativehumidity_2m?.[0] || 65,
+          city: resolvedCity,
         });
       })
       .catch((err) => {
         console.error(err);
-        setError("Erro ao obter previsão do tempo");
+        setError("Erro ao obter dados agro-climáticos");
       })
       .finally(() => {
         setLoading(false);
@@ -67,7 +75,7 @@ export function AgroWeatherTelemetry() {
   const getGeolocation = () => {
     if (!navigator.geolocation) {
       setError("Geolocalização não suportada no navegador");
-      // Fallback to Mato Grosso / Asuncion coords
+      // Fallback coordinates (Asuncion, PY)
       fetchWeather(-25.2637, -57.5759);
       return;
     }
@@ -86,17 +94,6 @@ export function AgroWeatherTelemetry() {
 
   useEffect(() => {
     getGeolocation();
-
-    // Simulate real-time telemetry sensor fluctuations
-    const interval = setInterval(() => {
-      setTelemetry((prev) => ({
-        fuelRate: Math.max(10, Math.min(80, +(prev.fuelRate + (Math.random() * 4 - 2)).toFixed(1))),
-        engineLoad: Math.max(20, Math.min(100, +(prev.engineLoad + (Math.random() * 6 - 3)).toFixed(0))),
-        speed: Math.max(0, Math.min(30, +(prev.speed + (Math.random() * 2 - 1)).toFixed(1))),
-      }));
-    }, 3000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const getWeatherDescription = (code: number) => {
@@ -152,6 +149,10 @@ export function AgroWeatherTelemetry() {
                     <p className="text-xs font-semibold text-primary">
                       {getWeatherDescription(weather?.weatherCode || 0)}
                     </p>
+                    <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1 font-semibold">
+                      <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                      {weather?.city || "Sua Localização"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-col gap-1 items-end text-[9px]">
@@ -189,91 +190,6 @@ export function AgroWeatherTelemetry() {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Telemetry Gauge Card */}
-      <Card className="rounded-xl border border-border shadow-sm bg-card text-card-foreground overflow-hidden transition-all duration-300 hover:shadow-md">
-        <CardHeader className="border-b border-border bg-muted/30 px-5 py-4">
-          <CardTitle className="text-sm font-bold flex items-center gap-2 text-primary">
-            <Gauge className="h-4.5 w-4.5" />
-            Telemetria da Frota (Real-Time)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-5 space-y-4">
-          <div className="flex justify-around items-center gap-2">
-            {/* Engine Load Gauge */}
-            <div className="flex flex-col items-center text-center">
-              <div className="relative w-16 h-16 flex items-center justify-center">
-                <svg className="absolute w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                  <path
-                    className="text-border/40"
-                    strokeWidth="3.5"
-                    stroke="currentColor"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    className="text-primary transition-all duration-500"
-                    strokeWidth="3.5"
-                    strokeDasharray={`${telemetry.engineLoad}, 100`}
-                    strokeLinecap="round"
-                    stroke="currentColor"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                </svg>
-                <div className="flex flex-col items-center z-10">
-                  <span className="text-xs font-bold text-foreground">
-                    {telemetry.engineLoad}%
-                  </span>
-                </div>
-              </div>
-              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider mt-1.5">
-                Carga do Motor
-              </span>
-            </div>
-
-            {/* Fuel Rate Gauge */}
-            <div className="flex flex-col items-center text-center">
-              <div className="relative w-16 h-16 flex items-center justify-center">
-                <svg className="absolute w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                  <path
-                    className="text-border/40"
-                    strokeWidth="3.5"
-                    stroke="currentColor"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    className="text-amber-500 transition-all duration-500"
-                    strokeWidth="3.5"
-                    strokeDasharray={`${(telemetry.fuelRate / 80) * 100}, 100`}
-                    strokeLinecap="round"
-                    stroke="currentColor"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                </svg>
-                <div className="flex flex-col items-center z-10">
-                  <span className="text-xs font-bold text-foreground">
-                    {telemetry.fuelRate}
-                  </span>
-                  <span className="text-[8px] text-muted-foreground">L/h</span>
-                </div>
-              </div>
-              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider mt-1.5">
-                Consumo Comb.
-              </span>
-            </div>
-          </div>
-
-          <div className="border-t border-border pt-3 flex justify-between items-center text-xs font-medium">
-            <span className="text-muted-foreground flex items-center gap-1.5">
-              <Zap className="h-3.5 w-3.5 text-primary" /> Velocidade Média
-            </span>
-            <span className="font-bold text-foreground">{telemetry.speed} km/h</span>
-          </div>
         </CardContent>
       </Card>
     </div>

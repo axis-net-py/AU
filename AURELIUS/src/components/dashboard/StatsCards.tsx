@@ -43,42 +43,62 @@ export function StatsCards({ dateRange, currency }: StatsCardsProps) {
 
   return (
     <div className="grid grid-cols-2 gap-3">
+      {/* Total Area Card */}
       <Card className="border-l-4 border-l-[hsl(var(--primary))] shadow-sm bg-card">
         <CardHeader className="p-3 pb-1">
           <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            Vendas
+            Área Cultivada
           </CardTitle>
         </CardHeader>
         <CardContent className="p-3 pt-0">
           <div className="flex flex-col gap-0.5">
             <h3 className={`${geistMono.className} text-base font-bold text-foreground truncate`}>
-              {formatCurrency(Number(data.salesTotal), currency)}
+              {data.totalArea.toFixed(1)} ha
             </h3>
-            <span className="text-[9px] text-primary dark:text-emerald-400 font-semibold">+{data.salesCount} trans</span>
+            <span className="text-[9px] text-primary dark:text-emerald-400 font-semibold">Total de talhões ativos</span>
           </div>
         </CardContent>
       </Card>
 
+      {/* Active Seasons Card */}
       <Card className="border-l-4 border-l-[hsl(var(--primary))] shadow-sm bg-card">
         <CardHeader className="p-3 pb-1">
           <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            Compras
+            Safras Ativas
           </CardTitle>
         </CardHeader>
         <CardContent className="p-3 pt-0">
           <div className="flex flex-col gap-0.5">
             <h3 className={`${geistMono.className} text-base font-bold text-foreground truncate`}>
-              {formatCurrency(Number(data.purchasesTotal), currency)}
+              {data.activeSeasons}
             </h3>
-            <span className="text-[9px] text-muted-foreground font-semibold">Saídas</span>
+            <span className="text-[9px] text-muted-foreground font-semibold">Ciclos em andamento</span>
           </div>
         </CardContent>
       </Card>
 
+      {/* Fleet Size Card */}
+      <Card className="border-l-4 border-l-[hsl(var(--primary))] shadow-sm bg-card">
+        <CardHeader className="p-3 pb-1">
+          <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Frota de Máquinas
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 pt-0">
+          <div className="flex flex-col gap-0.5">
+            <h3 className={`${geistMono.className} text-base font-bold text-foreground truncate`}>
+              {data.fleetSize}
+            </h3>
+            <span className="text-[9px] text-muted-foreground font-semibold">Veículos cadastrados</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Low Stock Inputs Card */}
       <Card className="border-l-4 border-l-[hsl(var(--accent))] shadow-sm bg-card">
         <CardHeader className="p-3 pb-1">
           <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            Estoque Baixo
+            Alerta de Estoque
           </CardTitle>
         </CardHeader>
         <CardContent className="p-3 pt-0">
@@ -86,23 +106,7 @@ export function StatsCards({ dateRange, currency }: StatsCardsProps) {
             <h3 className={`${geistMono.className} text-base font-bold text-foreground`}>
               {data.lowStockAlerts}
             </h3>
-            <span className="text-[9px] text-amber-600 font-semibold">itens</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-l-4 border-l-[hsl(var(--primary))] shadow-sm bg-card">
-        <CardHeader className="p-3 pb-1">
-          <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            Liquidez
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-3 pt-0">
-          <div className="flex flex-col gap-0.5">
-            <h3 className={`${geistMono.className} text-base font-bold text-foreground truncate`}>
-              {formatCurrency(Number(data.liquidity), currency)}
-            </h3>
-            <span className="text-[9px] text-muted-foreground font-semibold">Disponível</span>
+            <span className="text-[9px] text-amber-600 font-semibold">itens baixos</span>
           </div>
         </CardContent>
       </Card>

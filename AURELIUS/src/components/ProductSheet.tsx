@@ -36,7 +36,7 @@ export function ProductSheet({
   const [unit, setUnit] = useState(product?.unit ?? "un");
   const [minStock, setMinStock] = useState(product?.minStock ? Number(product.minStock) : 0);
   const [isActive, setIsActive] = useState(product?.isActive ?? true);
-  const [tags, setTags] = useState(product?.tags ?? "");
+  const [tags, setTags] = useState(product?.tags || "sementes");
   const [isService, setIsService] = useState(product?.isService ?? false);
   const [currency, setCurrency] = useState<"PYG" | "USD" | "BRL">(product?.currency ?? "PYG");
 
@@ -237,13 +237,22 @@ export function ProductSheet({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-[11px] text-primary uppercase tracking-widest font-bold">Tags / Filtros (Separados por vírgula)</Label>
-              <Input
+              <Label className="text-[11px] text-primary uppercase tracking-widest font-bold">Categoria</Label>
+              <Select
                 value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                placeholder="Ex: eletronicos, importado, novo"
-                className="bg-background border-border text-[13px] h-[40px] rounded-[8px] font-medium shadow-sm focus:ring-primary/20"
-              />
+                onValueChange={(val) => setTags(val)}
+              >
+                <SelectTrigger className="bg-background border-border text-[13px] h-[40px] rounded-[8px] focus:ring-primary/20">
+                  <SelectValue placeholder="Selecione uma categoria" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border text-popover-foreground rounded-[8px]">
+                  <SelectItem value="sementes" className="text-[12px]">Sementes</SelectItem>
+                  <SelectItem value="insumos" className="text-[12px]">Insumos</SelectItem>
+                  <SelectItem value="combustivel" className="text-[12px]">Combustível</SelectItem>
+                  <SelectItem value="maquinario" className="text-[12px]">Maquinário / Peças</SelectItem>
+                  <SelectItem value="outros" className="text-[12px]">Outros</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
